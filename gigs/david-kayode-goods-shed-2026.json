@@ -1,0 +1,41 @@
+{
+  "$schema": "../schema/gig.schema.json",
+  "slug": "david-kayode-goods-shed-2026",
+  "title": "David Kayode",
+  "date": "2026-07-03",
+  "venue": "Goods Shed",
+  "location": "Stroud, UK",
+  "artists": [
+    "David Kayode"
+  ],
+  "permission": "display-only",
+  "description": "",
+  "cover": "P1000063.jpg",
+  "images": [
+    {
+      "file": "P1000063.jpg",
+      "width": 4989,
+      "height": 2770
+    },
+    {
+      "file": "P1000072.jpg",
+      "width": 6007,
+      "height": 3468
+    },
+    {
+      "file": "P1000075.jpg",
+      "width": 2435,
+      "height": 4288
+    },
+    {
+      "file": "P1000076.jpg",
+      "width": 5475,
+      "height": 2694
+    },
+    {
+      "file": "P1000099.jpg",
+      "width": 2446,
+      "height": 4186
+    }
+  ]
+}

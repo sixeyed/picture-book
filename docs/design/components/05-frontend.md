@@ -115,9 +115,14 @@ behaviour (open web rendition) remains the no-JS fallback.
    backdrop (click target === dialog).
 5. **Swipe** — `pointerdown`/`pointerup` on the dialog: horizontal delta > 40 px and
    |dx| > |dy| → prev/next. (Pointer events cover touch; no touch-event code.)
-6. **Close** — dialog `close` event: restore `body` overflow, clear the hash
-   (`history.replaceState(null, "", location.pathname)`), return focus to the
-   thumbnail for the last-shown image (`items[current].el.focus()`).
+6. **Close** — cleanup must be event-independent: some browsers do not deliver
+   the dialog `close` event (observed in Chrome 2026 — Escape fired only
+   `cancel`); run an idempotent `cleanup()` from both `close` and `cancel` AND
+   directly after our own `dialog.close()` calls. Cleanup: restore `body`
+   overflow, clear the hash (`history.replaceState(null, "", location.pathname)`),
+   and best-effort focus return to the last-shown image's thumbnail (rAF-deferred;
+   the browser's native focus restore to the originally-clicked thumb may win the
+   race — either outcome is acceptable).
 7. **Deep link** — on load, if `location.hash` matches an item's `stem`, `open` that
    index immediately (this is the shareable per-image URL from high-level §6.4).
 8. **Loading state** — set a `data-loading` attribute on the dialog while the new
