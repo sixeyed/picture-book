@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>{% if title %}{{ title }} — {{ site.name }}{% else %}{{ site.name }}{% endif %}</title>
+  <meta property="og:title" content="{% if title %}{{ title }} — {{ site.name }}{% else %}{{ site.name }}{% endif %}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ site.url }}{{ page.url }}">
+  {% if ogImage %}<meta property="og:image" content="{{ ogImage }}">{% endif %}
+  <link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+  <header>
+    <a href="/">{{ site.name }}</a>
+    <a href="/about/">About</a>
+  </header>
+  <main>
+    {{ content | safe }}
+  </main>
+  <footer>
+    <p>&copy; {{ currentYear }} {{ site.name }} · <a href="{{ site.instagram }}">Instagram</a></p>
+  </footer>
+  {% if needsGallery %}<script src="/assets/gallery.js" defer></script>{% endif %}
+</body>
+</html>

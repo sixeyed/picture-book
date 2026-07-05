@@ -1,0 +1,18 @@
+---
+layout: base.njk
+permalink: /
+---
+<p class="intro">{{ site.intro }}</p>
+<ul class="cards">
+  {% for gig in gigs %}
+  <li>
+    <a href="/{{ gig.slug }}/">
+      <img src="/thumbs/{{ gig.slug }}/{{ gig.cover }}" alt="{{ gig.title }}"
+           width="{{ gig.coverImage.thumbWidth }}" height="{{ gig.coverImage.thumbHeight }}"
+           loading="lazy" decoding="async">
+      <h2>{{ gig.title }}</h2>
+      <p>{{ gig.venue }} · {{ gig.date | displayDate }}</p>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
