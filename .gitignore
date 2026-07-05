@@ -1,0 +1,5 @@
+node_modules/
+originals/
+build/
+.r2-stage/
+.wrangler/
