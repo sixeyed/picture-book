@@ -95,9 +95,24 @@
     });
   });
 
+  // Cleanup is event-independent: some browsers fail to deliver the dialog
+  // "close" event (observed in Chrome — Escape fired only "cancel", and even
+  // programmatic close() delivered no "close"). Run it from both events AND
+  // directly after our own dialog.close() calls. Idempotent — safe to run twice.
+  function cleanup() {
+    document.body.style.overflow = "";
+    history.replaceState(null, "", location.pathname);
+    // Browsers natively restore focus to the previously-focused element after
+    // close, which would override a synchronous focus() — defer so ours wins
+    // (and lands on the last-viewed image's thumb, not the originally-clicked one).
+    const el = items[current]?.el;
+    if (el) requestAnimationFrame(() => el.focus());
+  }
+
   closeBtn.addEventListener("click", () => {
     if (consumeSwipe()) return;
     dialog.close();
+    cleanup();
   });
   prevBtn.addEventListener("click", () => {
     if (consumeSwipe()) return;
@@ -116,6 +131,7 @@
     if (e.target !== dialog) return;
     if (consumeSwipe()) return;
     dialog.close();
+    cleanup();
   });
 
   dialog.addEventListener("keydown", (e) => {
@@ -124,11 +140,8 @@
     else if (e.key === "ArrowLeft") show(current - 1);
   });
 
-  dialog.addEventListener("close", () => {
-    document.body.style.overflow = "";
-    history.replaceState(null, "", location.pathname);
-    items[current]?.el.focus();
-  });
+  dialog.addEventListener("close", cleanup);
+  dialog.addEventListener("cancel", cleanup); // Escape path; "close" may not fire
 
   // Swipe navigation. A touch swipe also fires a trailing click on the element
   // under the finger (pointerdown -> pointerup -> click), which would double-fire
