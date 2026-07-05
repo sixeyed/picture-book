@@ -125,19 +125,24 @@ Front matter: `layout: base.njk`, `permalink: /`.
 
 ### `src/gig.njk` — one page per gig (pagination)
 
-Front matter:
+Front matter — use Eleventy's `---js` front matter, NOT YAML template strings.
+(A YAML `title: "{{ gig.title }}"` gets rendered-and-autoescaped once at
+computed-data time and again by base.njk's `{{ title }}`, double-escaping any
+`&`/quotes in gig titles — found and fixed in review.)
 
-```yaml
-pagination:
-  data: gigs
-  size: 1
-  alias: gig
-permalink: "/{{ gig.slug }}/"
-eleventyComputed:
-  title: "{{ gig.title }}"
-  needsGallery: true
-  ogImage: "{{ site.url }}/img/web/{{ gig.slug }}/{{ gig.cover }}"
-layout: base.njk
+```javascript
+---js
+{
+  layout: "base.njk",
+  pagination: { data: "gigs", size: 1, alias: "gig" },
+  permalink: (data) => `/${data.gig.slug}/`,
+  eleventyComputed: {
+    title: (data) => data.gig.title,
+    needsGallery: true,
+    ogImage: (data) => `${data.site.url}/img/web/${data.gig.slug}/${data.gig.cover}`,
+  },
+}
+---
 ```
 
 Body: heading block (`title`, artists joined with ` · `, `venue`, `location`,
