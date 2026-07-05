@@ -140,23 +140,6 @@ test("validateGig: empty images array", () => {
   assert(errors.some(e => e.includes("images")), "Should error about empty images array");
 });
 
-test("validateGig: missing description defaults to empty string", async () => {
-  const dir = await mkdtemp(join(tmpdir(), "gigs-"));
-  const gig = {
-    slug: "summer-fest",
-    title: "Summer Festival",
-    date: "2026-06-21",
-    venue: "The Foundry",
-    location: "Sheffield, UK",
-    artists: ["The Example Band"],
-    permission: "display-only",
-    cover: "P1000063.jpg",
-    images: [{ file: "P1000063.jpg", width: 6000, height: 4000 }]
-  };
-  const errors = validateGig(gig, "summer-fest.json");
-  assert.deepEqual(errors, [], "Gig without description should be valid");
-});
-
 test("loadGigs: images authored out of order are sorted by filename", async () => {
   const dir = await mkdtemp(join(tmpdir(), "gigs-"));
   const gigData = {
@@ -360,4 +343,103 @@ test("validateGig: invalid image file missing", () => {
   };
   const errors = validateGig(gig, "summer-fest.json");
   assert(errors.some(e => e.includes("file")), "Should error about missing file in image");
+});
+
+test("validateGig: empty string in artists array", () => {
+  const gig = {
+    slug: "summer-fest",
+    title: "Summer Festival",
+    date: "2026-06-21",
+    venue: "The Foundry",
+    location: "Sheffield, UK",
+    artists: [""],
+    permission: "display-only",
+    cover: "P1000063.jpg",
+    images: [{ file: "P1000063.jpg", width: 6000, height: 4000 }]
+  };
+  const errors = validateGig(gig, "summer-fest.json");
+  assert(errors.some(e => e.includes("artists[0]") && e.includes("non-empty string")), "Should error about empty artist");
+});
+
+test("loadGigs: gig file with images as non-array throws aggregated error", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "gigs-"));
+
+  const goodGig = {
+    slug: "good-gig",
+    title: "Good Festival",
+    date: "2026-06-21",
+    venue: "The Foundry",
+    location: "Sheffield, UK",
+    artists: ["The Example Band"],
+    permission: "display-only",
+    cover: "P1000063.jpg",
+    images: [{ file: "P1000063.jpg", width: 6000, height: 4000 }]
+  };
+
+  const badGig = {
+    slug: "bad-gig",
+    title: "Bad Festival",
+    date: "2026-07-01",
+    venue: "The Foundry",
+    location: "Sheffield, UK",
+    artists: ["The Example Band"],
+    permission: "display-only",
+    cover: "P1000063.jpg",
+    images: "not-an-array"
+  };
+
+  await writeFile(join(dir, "good-gig.json"), JSON.stringify(goodGig));
+  await writeFile(join(dir, "bad-gig.json"), JSON.stringify(badGig));
+
+  try {
+    await loadGigs(dir);
+    assert.fail("Should have thrown");
+  } catch (e) {
+    assert(e.message.includes("Gig validation failed"), "Error should be aggregated validation error");
+    assert(e.message.includes("bad-gig.json"), "Error message should name the bad file");
+    assert(!e.message.includes("localeCompare"), "Error should not be TypeError from localeCompare");
+  }
+});
+
+test("loadGigs: gig with image missing file throws aggregated error", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "gigs-"));
+
+  const goodGig = {
+    slug: "good-gig",
+    title: "Good Festival",
+    date: "2026-06-21",
+    venue: "The Foundry",
+    location: "Sheffield, UK",
+    artists: ["The Example Band"],
+    permission: "display-only",
+    cover: "P1000063.jpg",
+    images: [{ file: "P1000063.jpg", width: 6000, height: 4000 }]
+  };
+
+  const badGig = {
+    slug: "bad-gig",
+    title: "Bad Festival",
+    date: "2026-07-01",
+    venue: "The Foundry",
+    location: "Sheffield, UK",
+    artists: ["The Example Band"],
+    permission: "display-only",
+    cover: "P1000063.jpg",
+    images: [
+      { file: "P1000063.jpg", width: 6000, height: 4000 },
+      { width: 6000, height: 4000 }
+    ]
+  };
+
+  await writeFile(join(dir, "good-gig.json"), JSON.stringify(goodGig));
+  await writeFile(join(dir, "bad-gig.json"), JSON.stringify(badGig));
+
+  try {
+    await loadGigs(dir);
+    assert.fail("Should have thrown");
+  } catch (e) {
+    assert(e.message.includes("Gig validation failed"), "Error should be aggregated validation error");
+    assert(e.message.includes("bad-gig.json"), "Error message should name the bad file");
+    assert(!e.message.includes("localeCompare"), "Error should not be TypeError from localeCompare");
+  }
 });

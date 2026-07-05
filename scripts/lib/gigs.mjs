@@ -15,7 +15,13 @@ export function validateGig(gig, fileName) {
   if (gig.slug && basename(fileName, ".json") !== gig.slug)
     err(`slug "${gig.slug}" does not match file name`);
   if (gig.date && !/^\d{4}-\d{2}-\d{2}$/.test(gig.date)) err(`invalid date "${gig.date}"`);
-  if (!Array.isArray(gig.artists) || gig.artists.length === 0) err(`"artists" must be a non-empty array`);
+  if (!Array.isArray(gig.artists) || gig.artists.length === 0) {
+    err(`"artists" must be a non-empty array`);
+  } else {
+    for (const [i, artist] of gig.artists.entries()) {
+      if (typeof artist !== "string" || artist.length === 0) err(`artists[${i}]: must be a non-empty string`);
+    }
+  }
   if (!PERMISSIONS.includes(gig.permission))
     err(`"permission" must be one of ${PERMISSIONS.join(", ")}`);
 
@@ -48,9 +54,13 @@ export async function loadGigs(dir = "gigs") {
       errors.push(`${file}: invalid JSON — ${e.message}`);
       continue;
     }
-    errors.push(...validateGig(gig, file));
-    gig.description ??= "";
-    gig.images?.sort((a, b) => a.file.localeCompare(b.file));   // display order = filename sort
+    const gigErrors = validateGig(gig, file);
+    errors.push(...gigErrors);
+    // Only apply normalization if this gig has no validation errors
+    if (gigErrors.length === 0) {
+      gig.description ??= "";
+      gig.images?.sort((a, b) => a.file.localeCompare(b.file));   // display order = filename sort
+    }
     gigs.push(gig);
   }
   if (errors.length) throw new Error(`Gig validation failed:\n  ${errors.join("\n  ")}`);
