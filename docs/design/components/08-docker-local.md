@@ -112,7 +112,7 @@ Push-Location $root
 try {
     if (-not (Test-Path (Join-Path $root 'node_modules'))) { npm install }
 
-    node --test scripts/
+    node --test          # bare form: auto-discovers **/*.test.mjs from the repo root
     if ($LASTEXITCODE -ne 0) { throw 'node tests failed' }
 
     if (Get-Module -ListAvailable Pester) {
@@ -125,7 +125,9 @@ try {
 finally { Pop-Location }
 ```
 
-`node --test scripts/` recurses into `scripts/lib/`, picking up every `*.test.mjs`.
+Bare `node --test` discovers every `*.test.mjs` under the repo (excluding
+`node_modules`). Do not pass `scripts/` as a directory argument — on Node 24.2.0
+that form fails with `ERR_MODULE_NOT_FOUND`.
 
 ## 5. `scripts/dev-seed.ps1`
 
