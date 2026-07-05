@@ -30,33 +30,45 @@ $root  = Split-Path $PSScriptRoot
 $build = Join-Path $root 'build'
 $stage = Join-Path $root '.r2-stage'
 
-# Preflight: fail fast with actionable messages
-foreach ($tool in 'rclone', 'wrangler', 'node') {
-    if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) { throw "$tool is not installed" }
+Push-Location $root
+try {
+    # Preflight: fail fast with actionable messages
+    foreach ($tool in 'rclone', 'wrangler', 'node') {
+        if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) { throw "$tool is not installed" }
+    }
+    if (-not (rclone listremotes | Select-String -SimpleMatch 'r2:')) {
+        throw "rclone remote 'r2' is not configured - see docs/design/components/07-publish-pipeline.md"
+    }
+
+    if (-not $SkipBuild) { & (Join-Path $PSScriptRoot 'build.ps1') }
+    if (-not (Test-Path $stage)) { throw "Nothing staged in .r2-stage - run build.ps1 first" }
+
+    # Push renditions to R2: only changed files upload; never deletes remote objects
+    $rcloneArgs = @('copy', $stage, 'r2:pictures-elton', '--checksum', '--transfers', '8', '--progress')
+    if ($DryRun) { $rcloneArgs += '--dry-run' }
+    rclone @rcloneArgs
+    if ($LASTEXITCODE -ne 0) { throw 'rclone copy failed' }
+
+    if ($DryRun) {
+        Write-Host 'Dry run - skipping deploy'
+    } else {
+        wrangler pages deploy $build --project-name pictures --commit-dirty=true
+        if ($LASTEXITCODE -ne 0) { throw 'wrangler deploy failed' }
+
+        Write-Host 'Published -> https://pictures.elton.stoneman.io'
+    }
 }
-if (-not (rclone listremotes | Select-String -SimpleMatch 'r2:')) {
-    throw "rclone remote 'r2' is not configured - see docs/design/components/07-publish-pipeline.md"
-}
-
-if (-not $SkipBuild) { & (Join-Path $PSScriptRoot 'build.ps1') }
-if (-not (Test-Path $stage)) { throw "Nothing staged in .r2-stage - run build.ps1 first" }
-
-# Push renditions to R2: only changed files upload; never deletes remote objects
-$rcloneArgs = @('copy', $stage, 'r2:pictures-elton', '--checksum', '--transfers', '8', '--progress')
-if ($DryRun) { $rcloneArgs += '--dry-run' }
-rclone @rcloneArgs
-if ($LASTEXITCODE -ne 0) { throw 'rclone copy failed' }
-
-if ($DryRun) { Write-Host 'Dry run - skipping deploy'; return }
-
-wrangler pages deploy $build --project-name pictures --commit-dirty=true
-if ($LASTEXITCODE -ne 0) { throw 'wrangler deploy failed' }
-
-Write-Host 'Published -> https://pictures.elton.stoneman.io'
+finally { Pop-Location }
 ```
 
 Design points:
 
+- **`Push-Location $root` / `finally { Pop-Location }`** — wrangler and rclone both
+  resolve config relative to the current directory (`wrangler.jsonc`, `functions/`
+  for the Pages Function binding). Without pinning cwd to the repo root, running
+  this script from anywhere else silently deploys without the Function/R2 binding.
+  The `-DryRun` early exit is inside the `try` block (not a bare `return`) so
+  `Pop-Location` always runs.
 - **Images before site** — order matters: if the deploy went first, a visitor could
   see a new page whose lightbox images aren't in R2 yet.
 - **`rclone copy`, not `sync`** — never deletes remote objects, so a local mishap
@@ -65,7 +77,10 @@ Design points:
   are unreferenced and R2 storage at this scale is pennies; when pruning is wanted,
   run `rclone sync $stage r2:pictures-elton --dry-run` **after a full clean build**
   and inspect before running it for real. Deliberately not automated
-  (ASSUMPTIONS.md #9).
+  (ASSUMPTIONS.md #9). The same lingering applies to a permission downgrade
+  (`editorial` → `display-only`): the gig's already-uploaded `full/` objects stay
+  live in R2 — component 3's cleanup only stops the local stage from re-uploading
+  them (see component 3) — until that manual prune is run.
 - **`--checksum`** — compares hashes instead of times, so rebuilding renditions with
   identical content doesn't re-upload the archive.
 

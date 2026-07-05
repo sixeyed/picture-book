@@ -39,7 +39,12 @@ export async function onRequest({ request, params, env }) {
     return new Response("Method not allowed", { status: 405, headers: { allow: "GET, HEAD" } });
   }
 
-  const key = (params.path ?? []).map(decodeURIComponent).join("/");
+  let key;
+  try {
+    key = (params.path ?? []).map(decodeURIComponent).join("/");
+  } catch {
+    return new Response("Not found", { status: 404 }); // malformed percent-encoding (e.g. "a%zz.jpg")
+  }
   if (!ALLOWED_PREFIXES.some((p) => key.startsWith(p)) || key.includes("..")) {
     return new Response("Not found", { status: 404 });
   }
@@ -67,6 +72,10 @@ Design points:
 - **Prefix allowlist** — the binding has full bucket access; the URL must not.
   Anything outside `web/`/`full/` (or containing `..`) is a 404, indistinguishable
   from a missing object.
+- **Decode is wrapped in try/catch** — `decodeURIComponent` throws `URIError` on
+  malformed percent-encoding (e.g. a segment like `a%zz.jpg`); left unguarded that
+  would surface as an unhandled 500 instead of the same 404 every other
+  not-found/disallowed path already returns.
 - **Immutable, 1-year cache** — filenames are content identity (overview §3.4), so
   the edge and browsers may cache forever. Consequence: replacing an image's bytes
   under the same name will serve stale copies up to a year; rename instead
@@ -114,6 +123,8 @@ const fakeR2 = (objects) => ({
 | `HEAD` existing object | 200, empty body, same headers |
 | `if-none-match` matching etag | 304, no body |
 | URL-encoded key (`a%20b.jpg`) | decoded before R2 lookup |
+| malformed percent-encoding (`a%zz.jpg`) | 404 (caught `URIError`), not a 500 |
+| missing `params.path` (empty path) | 404 |
 | object with stored content-type | passed through; without → `image/jpeg` fallback |
 
 Integration smoke (manual): seed local R2 as in §3, `npx wrangler pages dev build`,

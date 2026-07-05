@@ -24,7 +24,7 @@
   <li>
     <a class="thumb" href="/img/web/{{ gig.slug }}/{{ img.file }}"
        data-stem="{{ img.stem }}"
-       data-full="/img/full/{{ gig.slug }}/{{ img.file }}"
+       {% if gig.permission != "display-only" %}data-full="/img/full/{{ gig.slug }}/{{ img.file }}"{% endif %}
        style="aspect-ratio: {{ img.width }} / {{ img.height }}">
       <img src="/thumbs/{{ gig.slug }}/{{ img.file }}" alt="{{ gig.title }}"
            width="{{ img.thumbWidth }}" height="{{ img.thumbHeight }}" loading="lazy" decoding="async">

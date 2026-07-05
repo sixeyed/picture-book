@@ -148,10 +148,10 @@ computed-data time and again by base.njk's `{{ title }}`, double-escaping any
 Body: heading block (`title`, artists joined with ` · `, `venue`, `location`,
 `date | displayDate`), then `<p class="blurb">{{ gig.description }}</p>` when
 non-empty, then the gallery grid **exactly per the markup contract in overview
-§3.6** (`ul.grid[data-download]` → `a.thumb[data-stem][data-full]` → `img` with
-dimensions and `loading="lazy"`; image order comes pre-sorted from the loader).
-This markup is the interface with component 5 — any change must be agreed in the
-overview first.
+§3.6** (`ul.grid[data-download]` → `a.thumb[data-stem]`, plus `[data-full]` only
+when `gig.permission != "display-only"`, → `img` with dimensions and
+`loading="lazy"`; image order comes pre-sorted from the loader). This markup is
+the interface with component 5 — any change must be agreed in the overview first.
 
 ### `src/about.njk`
 
@@ -177,7 +177,7 @@ Add test file `scripts/site.test.mjs` (runner: `node --test`) that:
 | gig page grid | one `a.thumb` per image, in filename order regardless of JSON array order |
 | blurb | gig with `description` renders it under the heading; empty description renders no blurb element |
 | markup contract | `href="/img/web/<slug>/<file>"`, `data-stem` without extension, `style="aspect-ratio: W / H"`, `img` has `width`/`height`/`loading="lazy"` |
-| permission | editorial gig: `data-download="true"`; display-only: `data-download="false"` |
+| permission | editorial gig: `data-download="true"` and has `data-full`; display-only: `data-download="false"` and has no `data-full` attribute at all |
 | OG tags | gig page has `og:image` ending `/img/web/<slug>/<cover>` |
 | gallery script | present on gig pages, absent on home/about |
 

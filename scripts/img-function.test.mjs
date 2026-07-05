@@ -74,6 +74,26 @@ test("key with .. segment returns 404", async () => {
   assert.equal(response.status, 404, "status should be 404 for path with ..");
 });
 
+test("malformed percent-encoding returns 404 instead of throwing", async () => {
+  const env = { PHOTOS: createFakeR2({ "web/gig/a.jpg": { body: "image-data" } }) };
+  const request = new Request("http://localhost/img/web/gig/a%zz.jpg", { method: "GET" });
+  const params = { path: ["web", "gig", "a%zz.jpg"] };
+
+  const response = await onRequest({ request, params, env });
+
+  assert.equal(response.status, 404, "status should be 404, not a thrown URIError");
+});
+
+test("missing params.path returns 404", async () => {
+  const env = { PHOTOS: createFakeR2({ "web/gig/a.jpg": { body: "image-data" } }) };
+  const request = new Request("http://localhost/img/", { method: "GET" });
+  const params = {};
+
+  const response = await onRequest({ request, params, env });
+
+  assert.equal(response.status, 404, "status should be 404 when params.path is undefined");
+});
+
 test("POST returns 405 with allow header", async () => {
   const env = { PHOTOS: createFakeR2({}) };
   const request = new Request("http://localhost/img/web/gig/a.jpg", { method: "POST" });

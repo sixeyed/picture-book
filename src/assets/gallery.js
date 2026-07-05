@@ -122,6 +122,14 @@
     if (consumeSwipe()) return;
     show(current + 1);
   });
+  if (downloadLink) {
+    // A swipe that releases over the download anchor still fires a trailing
+    // click (see swipe navigation below) - without this it would trigger a
+    // native download instead of just navigating the lightbox.
+    downloadLink.addEventListener("click", (e) => {
+      if (consumeSwipe()) e.preventDefault();
+    });
+  }
   img.addEventListener("click", () => {
     if (consumeSwipe()) return;
     show(current + 1);

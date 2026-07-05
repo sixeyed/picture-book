@@ -10,7 +10,9 @@ CSS + vanilla JS, no frameworks, no build step — these files ship as written.
 **Interfaces:**
 - Consumes: the markup contract (overview §3.6) and the page structure produced by
   component 4. JS binds only to: `ul.grid[data-download]`, `a.thumb` and its
-  `data-stem` / `data-full` attributes, and `href` (web rendition).
+  `data-stem` attribute and `href` (web rendition), plus `data-full` when present
+  (component 4 omits it entirely for `display-only` gigs — it is read but only
+  acted on when `data-download="true"`, i.e. when it's actually present).
 - Produces: no exports; progressive enhancement over working plain-HTML pages.
 
 ---
@@ -114,7 +116,12 @@ behaviour (open web rendition) remains the no-JS fallback.
    Close: close button, `Escape` (native dialog behaviour), or click on the dialog
    backdrop (click target === dialog).
 5. **Swipe** — `pointerdown`/`pointerup` on the dialog: horizontal delta > 40 px and
-   |dx| > |dy| → prev/next. (Pointer events cover touch; no touch-event code.)
+   |dx| > |dy| → prev/next. (Pointer events cover touch; no touch-event code.) A
+   swipe releasing over any interactive element (close/prev/next/image/backdrop,
+   and — when present — the download link) still fires a trailing click; every one
+   of those click handlers consumes the swipe flag so it doesn't double-fire. For
+   the download link specifically this means calling `preventDefault()` on that
+   trailing click, otherwise the swipe would trigger a native file download.
 6. **Close** — cleanup must be event-independent: some browsers do not deliver
    the dialog `close` event (observed in Chrome 2026 — Escape fired only
    `cancel`); run an idempotent `cleanup()` from both `close` and `cancel` AND
@@ -150,6 +157,7 @@ site under `npx wrangler pages dev build`:
 | no-JS fallback | disable JS → thumb click opens `/img/web/...` directly |
 | open/close | click thumb → lightbox; Esc, ✕, and backdrop-click all close; focus returns to the thumb |
 | navigation | ArrowRight/ArrowLeft cycle and wrap; image click advances; swipe works in device emulation |
+| swipe over download link | in device emulation, swipe releasing over "Full resolution" navigates only — no file download triggered |
 | deep link | open `/<slug>/#<stem>` → lightbox opens on that image; closing removes the hash; hash updates while navigating |
 | download visibility | editorial gig shows "Full resolution" linking `/img/full/...`; display-only gig shows none |
 | blurb | gig with a `description` shows it under the heading; empty description shows nothing |

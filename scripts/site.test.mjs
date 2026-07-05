@@ -151,6 +151,16 @@ test("gig page grid: markup contract matches overview §3.6 exactly", async () =
   });
 });
 
+test("data-full is display-only-conditional: absent for display-only gigs, present for editorial gigs", async () => {
+  await withBuiltSite(async (dir) => {
+    const displayHtml = await readBuild(dir, "display-only-gig/index.html");
+    assert(!displayHtml.includes("data-full"), "display-only gig page must not leak the full-res URL shape");
+
+    const editorialHtml = await readBuild(dir, "editorial-gig/index.html");
+    assert(editorialHtml.includes('data-full="/img/full/editorial-gig/P1000001.jpg"'), "editorial gig page must include data-full");
+  });
+});
+
 test("permission: editorial gig has data-download=true, display-only has data-download=false", async () => {
   await withBuiltSite(async (dir) => {
     const editorialHtml = await readBuild(dir, "editorial-gig/index.html");

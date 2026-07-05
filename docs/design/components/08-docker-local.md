@@ -110,7 +110,10 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot
 Push-Location $root
 try {
-    if (-not (Test-Path (Join-Path $root 'node_modules'))) { npm install }
+    # Check a marker file npm writes into node_modules, not the directory itself:
+    # a compose-managed named volume mounts as an empty node_modules/, so a bare
+    # existence check never fires and dependencies are never installed.
+    if (-not (Test-Path (Join-Path $root 'node_modules/.package-lock.json'))) { npm install }
 
     node --test          # bare form: auto-discovers **/*.test.mjs from the repo root
     if ($LASTEXITCODE -ne 0) { throw 'node tests failed' }
@@ -140,14 +143,22 @@ under `docker compose up web` (and plain `wrangler pages dev`):
 $ErrorActionPreference = 'Stop'
 $root  = Split-Path $PSScriptRoot
 $stage = Join-Path $root '.r2-stage'
-if (-not (Test-Path $stage)) { throw 'Nothing staged - run build.ps1 first' }
+Push-Location $root
+try {
+    if (-not (Test-Path $stage)) { throw 'Nothing staged - run build.ps1 first' }
 
-Get-ChildItem $stage -Recurse -File | ForEach-Object {
-    $key = [IO.Path]::GetRelativePath($stage, $_.FullName) -replace '\\', '/'
-    npx wrangler r2 object put "pictures-elton/$key" --file $_.FullName --local | Out-Null
-    Write-Host "seeded $key"
+    Get-ChildItem $stage -Recurse -File | ForEach-Object {
+        $key = [IO.Path]::GetRelativePath($stage, $_.FullName) -replace '\\', '/'
+        npx wrangler r2 object put "pictures-elton/$key" --file $_.FullName --local | Out-Null
+        Write-Host "seeded $key"
+    }
 }
+finally { Pop-Location }
 ```
+
+`Push-Location $root` matters here too: `npx wrangler r2 object put --local` reads
+the simulated bucket state from `.wrangler/` under the current directory, so
+running this from outside the repo root would seed (or read) the wrong local state.
 
 ## 6. Local workflow (documented in README later)
 

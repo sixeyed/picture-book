@@ -83,8 +83,10 @@ async function runPool(items, worker, concurrency) {
 
 // Removes outputs that no longer correspond to the current gig JSON:
 // - drops the whole full/ dir when a gig is (or has become) display-only
-//   (rclone copy never deletes on the remote, so this is what keeps R2 from
-//   accumulating revoked files - see component 7)
+//   (this only stops the local .r2-stage/full/ from being re-uploaded on the
+//   next rclone copy - rclone copy never deletes remotely, so any full/
+//   objects already pushed to R2 for this gig stay live until the manual
+//   prune - see component 7)
 // - removes individual thumb/web(/full) files for images no longer listed
 async function cleanupStale(gig) {
   const keep = new Set(gig.images.map((i) => i.file));

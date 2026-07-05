@@ -180,7 +180,7 @@ a new filename (ASSUMPTIONS.md #7).
   <li>
     <a class="thumb" href="/img/web/{{ gig.slug }}/{{ img.file }}"
        data-stem="{{ img.stem }}"
-       data-full="/img/full/{{ gig.slug }}/{{ img.file }}"
+       {% if gig.permission != "display-only" %}data-full="/img/full/{{ gig.slug }}/{{ img.file }}"{% endif %}
        style="aspect-ratio: {{ img.width }} / {{ img.height }}">
       <img src="/thumbs/{{ gig.slug }}/{{ img.file }}" alt="{{ gig.title }}"
            width="{{ img.thumbWidth }}" height="{{ img.thumbHeight }}" loading="lazy" decoding="async">
@@ -188,6 +188,10 @@ a new filename (ASSUMPTIONS.md #7).
   </li>
 </ul>
 ```
+
+`data-full` is emitted only when `gig.permission != "display-only"` — a
+display-only gig's markup must not leak the full-res URL shape at all, not just
+suppress the download link.
 
 `gallery.js` binds to `a.thumb`; with JS disabled the anchors still open the `web`
 rendition directly. `img.stem`, `img.thumbWidth`, `img.thumbHeight` are computed by

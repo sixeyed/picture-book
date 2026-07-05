@@ -5,7 +5,12 @@ export async function onRequest({ request, params, env }) {
     return new Response("Method not allowed", { status: 405, headers: { allow: "GET, HEAD" } });
   }
 
-  const key = (params.path ?? []).map(decodeURIComponent).join("/");
+  let key;
+  try {
+    key = (params.path ?? []).map(decodeURIComponent).join("/");
+  } catch {
+    return new Response("Not found", { status: 404 }); // malformed percent-encoding (e.g. "a%zz.jpg")
+  }
   if (!ALLOWED_PREFIXES.some((p) => key.startsWith(p)) || key.includes("..")) {
     return new Response("Not found", { status: 404 });
   }
