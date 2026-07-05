@@ -82,6 +82,14 @@ implementation starts. Items marked **§11** resolve the spec's open decisions.
     runtime validation is hand-rolled to mirror it (two places to update on schema
     change — accepted for zero deps).
 
-16. **Site copy placeholders:** `src/_data/site.js` carries the site name, intro
+16. **Docker local stack (user requirement, 2026-07-05):** the containers run the
+    same pwsh entry-point scripts as the host (image = Node 24 + pwsh + Pester;
+    repo bind-mounted; `node_modules` and wrangler local-R2 state in named
+    volumes). `wrangler pages dev` inside the container serves the full stack —
+    static site + image Function + simulated R2 — on `localhost:8788`. Publishing
+    stays host-side (needs `wrangler login`/rclone credentials). See
+    `components/08-docker-local.md`.
+
+17. **Site copy placeholders:** `src/_data/site.js` carries the site name, intro
     line, contact email (`elton@sixeyed.com` assumed) and an Instagram URL marked
     TODO. All user-facing wording needs your pass.

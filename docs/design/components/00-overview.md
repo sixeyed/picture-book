@@ -21,8 +21,9 @@ in [`../ASSUMPTIONS.md`](../ASSUMPTIONS.md).
 | 5 | [05-frontend.md](05-frontend.md) | `src/assets/site.css` + `src/assets/gallery.js` | 4 (markup contract) |
 | 6 | [06-image-function.md](06-image-function.md) | `functions/img/[[path]].js` + `wrangler.jsonc` | — |
 | 7 | [07-publish-pipeline.md](07-publish-pipeline.md) | `scripts/publish.ps1`, `.gitignore`, one-time Cloudflare setup | 3, 4, 6 |
+| 8 | [08-docker-local.md](08-docker-local.md) | Docker local stack: `Dockerfile`, `docker-compose.yml`, `scripts/test.ps1`, `scripts/dev-seed.ps1` | 3, 4, 6 |
 
-Build order for agents: **1 → (2, 3, 4, 6 in parallel) → 5 → 7.**
+Build order for agents: **1 → (2, 3, 4, 6 in parallel) → 5 → 7 → 8.**
 Components 2, 3, 4 only share the content model; 6 shares only the R2 key scheme.
 
 Each component doc contains: files, interfaces (consumes/produces), behaviour,
