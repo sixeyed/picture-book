@@ -32,6 +32,18 @@ const EDITORIAL_GIG = {
   ],
 };
 
+const SPECIAL_CHARS_GIG = {
+  slug: "special-chars-gig",
+  title: 'Rock & Roll "Night"',
+  date: "2024-03-01",
+  venue: "The Cellar",
+  location: "Manchester, UK",
+  artists: ["The Ampersands"],
+  permission: "editorial",
+  cover: "P3000001.jpg",
+  images: [{ file: "P3000001.jpg", width: 3000, height: 2000 }],
+};
+
 const DISPLAY_ONLY_GIG = {
   slug: "display-only-gig",
   title: "Display Only Gig",
@@ -55,6 +67,7 @@ async function withBuiltSite(fn) {
     await mkdir(join(dir, "gigs"), { recursive: true });
     await writeFile(join(dir, "gigs", `${EDITORIAL_GIG.slug}.json`), JSON.stringify(EDITORIAL_GIG));
     await writeFile(join(dir, "gigs", `${DISPLAY_ONLY_GIG.slug}.json`), JSON.stringify(DISPLAY_ONLY_GIG));
+    await writeFile(join(dir, "gigs", `${SPECIAL_CHARS_GIG.slug}.json`), JSON.stringify(SPECIAL_CHARS_GIG));
 
     process.chdir(dir);
     try {
@@ -166,5 +179,15 @@ test("gallery script: present on gig pages, absent on home and about", async () 
 
     const aboutHtml = await readBuild(dir, "about/index.html");
     assert(!aboutHtml.includes("gallery.js"), "about page should not load gallery.js");
+  });
+});
+
+test("escaping: gig title with & and quotes is escaped exactly once in <title> and og:title", async () => {
+  await withBuiltSite(async (dir) => {
+    const html = await readBuild(dir, "special-chars-gig/index.html");
+    assert(!html.includes("&amp;amp;"), "must not double-escape ampersands");
+    assert(!html.includes("&amp;quot;"), "must not double-escape quotes");
+    assert(/<title>Rock &amp; Roll (&quot;|")Night(&quot;|") — /.test(html), "title tag single-escaped");
+    assert(/<meta property="og:title" content="Rock &amp; Roll &quot;Night&quot; — /.test(html), "og:title single-escaped");
   });
 });

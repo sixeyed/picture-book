@@ -1,14 +1,18 @@
----
-pagination:
-  data: gigs
-  size: 1
-  alias: gig
-permalink: "/{{ gig.slug }}/"
-eleventyComputed:
-  title: "{{ gig.title }}"
-  needsGallery: true
-  ogImage: "{{ site.url }}/img/web/{{ gig.slug }}/{{ gig.cover }}"
-layout: base.njk
+---js
+{
+  // js front matter so computed values are plain strings — YAML template
+  // strings ("{{ gig.title }}") are rendered (and autoescaped) once at
+  // computed-data time and then escaped again by base.njk, double-escaping
+  // titles containing & or quotes.
+  pagination: { data: "gigs", size: 1, alias: "gig" },
+  permalink: (data) => `/${data.gig.slug}/`,
+  layout: "base.njk",
+  eleventyComputed: {
+    title: (data) => data.gig.title,
+    needsGallery: true,
+    ogImage: (data) => `${data.site.url}/img/web/${data.gig.slug}/${data.gig.cover}`,
+  },
+}
 ---
 <h1>{{ gig.title }}</h1>
 <p class="meta">
