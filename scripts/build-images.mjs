@@ -143,10 +143,34 @@ export async function run(argv = []) {
   const jobs = [];
   for (const gig of gigs) for (const img of gig.images) jobs.push({ gig, img });
 
+  // Same collect-report-exit-1 pattern as missing sources: a failed image
+  // (corrupt JPEG, I/O error) is recorded and the remaining images finish,
+  // so one run reports every problem.
+  const failures = [];
   const counts = { thumb: 0, web: 0, full: 0 };
-  await runPool(jobs, ({ gig, img }) => processImage(gig, img, counts), CONCURRENCY);
+  await runPool(
+    jobs,
+    async ({ gig, img }) => {
+      try {
+        await processImage(gig, img, counts);
+      } catch (e) {
+        failures.push(`${gig.slug}/${img.file}: ${e.message}`);
+      }
+    },
+    CONCURRENCY
+  );
 
-  for (const gig of gigs) await cleanupStale(gig);
+  for (const gig of gigs) {
+    try {
+      await cleanupStale(gig);
+    } catch (e) {
+      failures.push(`${gig.slug}: cleanup failed - ${e.message}`);
+    }
+  }
+
+  if (failures.length) {
+    return { exitCode: 1, message: `Image processing failed:\n  ${failures.join("\n  ")}`, counts };
+  }
 
   const applicable = gigs.reduce(
     (sum, g) => sum + g.images.length * (g.permission === "display-only" ? 2 : 3),

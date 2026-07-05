@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, writeFile, mkdir, stat, utimes, rm } from "node:fs/promises";
+import { mkdtemp, writeFile, mkdir, stat, utimes, rm, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
@@ -20,6 +20,7 @@ async function withWorkspace(fn) {
     await fn(dir);
   } finally {
     process.chdir(projectCwd);
+    await rm(dir, { recursive: true, force: true });
   }
 }
 
@@ -100,6 +101,10 @@ test("fresh build, editorial gig: thumb + web + full exist for each image, corre
       assert.ok(await exists(thumbPath), `${thumbPath} should exist`);
       assert.ok(await exists(webPath), `${webPath} should exist`);
       assert.ok(await exists(fullPath), `${fullPath} should exist`);
+
+      const srcBytes = await readFile(join("originals", gig.slug, file));
+      const fullBytes = await readFile(fullPath);
+      assert.ok(srcBytes.equals(fullBytes), "full rendition should be byte-identical to the original");
 
       const thumbMeta = await sharp(thumbPath).metadata();
       assert.equal(Math.max(thumbMeta.width, thumbMeta.height), 600, "thumb long edge should be 600");
@@ -304,5 +309,25 @@ test("missing gigs dir / invalid gig JSON: loadGigs error propagates as exit 1",
     const result = await run([]);
     assert.equal(result.exitCode, 1);
     assert.match(result.message, /broken\.json/);
+  });
+});
+
+test("corrupt source jpeg: exit 1, message names the file, other images still processed", async () => {
+  await withWorkspace(async () => {
+    const gig = makeGig();
+    await writeGig(gig);
+    await make3000x2000(gig.slug, "P1000001.jpg");
+    // "jpeg" that is actually garbage bytes - sharp will throw on it
+    const badPath = await originalPath(gig.slug, "P1000002.jpg");
+    await writeFile(badPath, Buffer.from("this is definitely not a jpeg"));
+
+    const result = await run([]);
+    assert.equal(result.exitCode, 1);
+    assert.match(result.message, /test-gig\/P1000002\.jpg/, "failure message should name the corrupt file");
+
+    // The healthy image's renditions were still produced.
+    assert.ok(await exists(join("build", "thumbs", gig.slug, "P1000001.jpg")));
+    assert.ok(await exists(join(".r2-stage", "web", gig.slug, "P1000001.jpg")));
+    assert.ok(await exists(join(".r2-stage", "full", gig.slug, "P1000001.jpg")));
   });
 });
