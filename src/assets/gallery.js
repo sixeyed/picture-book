@@ -37,6 +37,7 @@
     nextBtn.textContent = "›";
 
     const img = document.createElement("img");
+    img.draggable = false;
 
     const footer = document.createElement("footer");
     const counter = document.createElement("span");
@@ -94,16 +95,31 @@
     });
   });
 
-  closeBtn.addEventListener("click", () => dialog.close());
-  prevBtn.addEventListener("click", () => show(current - 1));
-  nextBtn.addEventListener("click", () => show(current + 1));
-  img.addEventListener("click", () => show(current + 1));
+  closeBtn.addEventListener("click", () => {
+    if (consumeSwipe()) return;
+    dialog.close();
+  });
+  prevBtn.addEventListener("click", () => {
+    if (consumeSwipe()) return;
+    show(current - 1);
+  });
+  nextBtn.addEventListener("click", () => {
+    if (consumeSwipe()) return;
+    show(current + 1);
+  });
+  img.addEventListener("click", () => {
+    if (consumeSwipe()) return;
+    show(current + 1);
+  });
 
   dialog.addEventListener("click", (e) => {
-    if (e.target === dialog) dialog.close();
+    if (e.target !== dialog) return;
+    if (consumeSwipe()) return;
+    dialog.close();
   });
 
   dialog.addEventListener("keydown", (e) => {
+    swipeHandled = false; // keyboard interaction; never suppress its clicks
     if (e.key === "ArrowRight") show(current + 1);
     else if (e.key === "ArrowLeft") show(current - 1);
   });
@@ -114,16 +130,28 @@
     items[current]?.el.focus();
   });
 
+  // Swipe navigation. A touch swipe also fires a trailing click on the element
+  // under the finger (pointerdown -> pointerup -> click), which would double-fire
+  // the image's click-to-advance (or close via the backdrop handler) — so when a
+  // qualifying swipe fires, flag it and let the click handlers consume the flag.
   let startX = 0;
   let startY = 0;
+  let swipeHandled = false;
+  function consumeSwipe() {
+    const handled = swipeHandled;
+    swipeHandled = false;
+    return handled;
+  }
   dialog.addEventListener("pointerdown", (e) => {
     startX = e.clientX;
     startY = e.clientY;
+    swipeHandled = false;
   });
   dialog.addEventListener("pointerup", (e) => {
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
     if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+      swipeHandled = true;
       if (dx < 0) show(current + 1);
       else show(current - 1);
     }

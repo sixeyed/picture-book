@@ -155,7 +155,10 @@ header a:first-child {
 /* Lightbox */
 
 .lightbox {
+  position: fixed;
+  inset: 0;
   width: 100vw;
+  height: 100vh;
   height: 100dvh;
   max-width: none;
   max-height: none;
@@ -164,6 +167,7 @@ header a:first-child {
   border: none;
   background: rgb(0 0 0 / 0.96);
   color: var(--text);
+  touch-action: pan-y;
 }
 
 .lightbox::backdrop {
@@ -174,8 +178,10 @@ header a:first-child {
   display: block;
   margin: 0 auto;
   max-width: 100vw;
+  max-height: calc(100vh - 56px);
   max-height: calc(100dvh - 56px);
   object-fit: contain;
+  -webkit-user-drag: none;
 }
 
 .lightbox[data-loading] img {
