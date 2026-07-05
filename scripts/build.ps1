@@ -5,7 +5,10 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot
 Push-Location $root
 try {
-    if (-not (Test-Path (Join-Path $root 'node_modules'))) { npm install }
+    # Check a marker file npm writes into node_modules, not the directory itself:
+    # a compose-managed named volume mounts as an empty node_modules/, so a bare
+    # existence check never fires and dependencies are never installed.
+    if (-not (Test-Path (Join-Path $root 'node_modules/.package-lock.json'))) { npm install }
 
     $imgArgs = @()
     if ($Gig) { $imgArgs = @('--gig', $Gig) }
