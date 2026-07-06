@@ -211,6 +211,12 @@ publish.ps1   : build.ps1 → rclone copy .r2-stage → r2:pictures-elton
 Eleventy does not clean its output directory, so both coexist. Both steps are
 incremental (skip work whose output is newer than its inputs).
 
+**`build.ps1` is the only supported way to build.** Running Eleventy alone after
+deleting `build/` silently loses `build/thumbs/` (Eleventy does not produce it) —
+pages then 404 their thumbnails until the next full build. This bit us once
+(2026-07-06); if `build/` is ever hand-cleaned, rerun `build.ps1`, not `npx
+@11ty/eleventy`.
+
 ---
 
 ## 4. Phases
