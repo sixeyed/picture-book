@@ -3,19 +3,62 @@
   "$id": "https://pictures.elton.stoneman.io/schema/gig.schema.json",
   "title": "Gig",
   "type": "object",
-  "required": ["slug", "title", "date", "venue", "location", "artists", "permission", "cover", "images"],
+  "required": ["slug", "title", "date", "venue", "artists", "permission", "cover", "images"],
   "additionalProperties": false,
+  "$defs": {
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["label", "url"],
+        "additionalProperties": false,
+        "properties": {
+          "label": { "type": "string", "minLength": 1 },
+          "url": { "type": "string", "minLength": 1, "format": "uri" }
+        }
+      }
+    }
+  },
   "properties": {
     "$schema": { "type": "string" },
     "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
     "title": { "type": "string", "minLength": 1 },
     "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
-    "venue": { "type": "string", "minLength": 1 },
-    "location": { "type": "string", "minLength": 1 },
-    "artists": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+    "venue": {
+      "type": "object",
+      "required": ["name", "location"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "location": { "type": "string", "minLength": 1 },
+        "links": { "$ref": "#/$defs/links" }
+      }
+    },
+    "artists": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "links": { "$ref": "#/$defs/links" }
+        }
+      }
+    },
     "permission": { "enum": ["display-only", "editorial", "commercial"] },
     "description": { "type": "string", "default": "" },
     "cover": { "type": "string", "minLength": 1 },
+    "layout": {
+      "type": "object",
+      "required": ["columns"],
+      "additionalProperties": false,
+      "properties": {
+        "columns": { "type": "integer", "minimum": 1 },
+        "widths": { "type": "array", "items": { "type": "number", "exclusiveMinimum": 0 } }
+      }
+    },
     "images": {
       "type": "array",
       "minItems": 1,
@@ -26,7 +69,8 @@
         "properties": {
           "file": { "type": "string", "minLength": 1 },
           "width": { "type": "integer", "minimum": 1 },
-          "height": { "type": "integer", "minimum": 1 }
+          "height": { "type": "integer", "minimum": 1 },
+          "column": { "type": "integer", "minimum": 0 }
         }
       }
     }

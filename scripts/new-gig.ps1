@@ -91,8 +91,20 @@ if ($LASTEXITCODE -ne 0) {
 $dimensions = $dimensionsJson | ConvertFrom-Json
 
 # --- 7. Write gigs/<slug>.json ------------------------------------------------
+# Seed column placement with the same heuristic the site uses: portraits
+# alternate into the outer columns, landscapes go to the centre. Edit freely.
+$columns = 3
+$centre = [int][math]::Floor(($columns - 1) / 2)
+$nextOuter = 0
 $images = @($dimensions | ForEach-Object {
-    [ordered]@{ file = $_.file; width = $_.width; height = $_.height }
+    if ($_.height -gt $_.width) {
+        $col = if ($nextOuter -eq 0) { 0 } else { $columns - 1 }
+        $nextOuter = if ($nextOuter -eq 0) { 1 } else { 0 }
+    }
+    else {
+        $col = $centre
+    }
+    [ordered]@{ file = $_.file; width = $_.width; height = $_.height; column = $col }
 })
 $cover = $images[0].file
 
@@ -101,20 +113,20 @@ $gig = [ordered]@{
     slug        = $Slug
     title       = $Title
     date        = $Date
-    venue       = $Venue
-    location    = $Location
-    artists     = @($Artists)
+    venue       = [ordered]@{ name = $Venue; location = $Location; links = @() }
+    artists     = @($Artists | ForEach-Object { [ordered]@{ name = $_; links = @() } })
     permission  = 'display-only'
     description = ''
     cover       = $cover
+    layout      = [ordered]@{ columns = $columns }
     images      = $images
 }
 
-$json = $gig | ConvertTo-Json -Depth 5
+$json = $gig | ConvertTo-Json -Depth 6
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText($gigJsonPath, $json + "`n", $utf8NoBom)
 
 # --- 8. Summary ---------------------------------------------------------------
 Write-Host "Copied $($jpegFiles.Count) image(s) to originals/$Slug/"
 Write-Host "Wrote $gigJsonPath"
-Write-Host "Next steps: edit title/venue/description, then run ./scripts/build.ps1"
+Write-Host "Next steps: edit title/venue/artist links + description, adjust image order/columns, then run ./scripts/build.ps1"

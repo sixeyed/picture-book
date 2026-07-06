@@ -1,13 +1,17 @@
 (() => {
-  const grid = document.querySelector("ul.grid");
+  const grid = document.querySelector(".columns");
   if (!grid) return;
-  const items = [...grid.querySelectorAll("a.thumb")].map((a) => ({
-    web: a.getAttribute("href"),
-    full: a.dataset.full,
-    stem: a.dataset.stem,
-    alt: a.querySelector("img")?.alt ?? "",
-    el: a,
-  }));
+  // Thumbs are grouped into columns in the DOM; sort by data-order so the
+  // lightbox next/prev sequence follows the authored array order, not columns.
+  const items = [...grid.querySelectorAll("a.thumb")]
+    .sort((a, b) => Number(a.dataset.order) - Number(b.dataset.order))
+    .map((a) => ({
+      web: a.getAttribute("href"),
+      full: a.dataset.full,
+      stem: a.dataset.stem,
+      alt: a.querySelector("img")?.alt ?? "",
+      el: a,
+    }));
   if (items.length === 0) return;
   const allowDownload = grid.dataset.download === "true";
   let current = -1;

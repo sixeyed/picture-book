@@ -130,6 +130,50 @@ Describe 'new-gig.ps1' {
         }
     }
 
+    Context 'metadata and layout shape' {
+        BeforeAll {
+            $script:Slug = New-Slug -Prefix 'shape'
+            # Single artist: passing a real string[] to `pwsh -File` isn't
+            # possible (that's a native-call concern); the script's N->N mapping
+            # is trivial. Assert the object shape instead.
+            Invoke-NewGig -ScriptArgs @('-Source', $script:FixtureSource, '-Slug', $script:Slug,
+                '-Venue', 'Test Hall', '-Location', 'Nowhere', '-Artists', 'Act One') | Out-Null
+            $script:Gig = Get-Content (Join-Path $script:GigsDir "$($script:Slug).json") -Raw | ConvertFrom-Json
+        }
+
+        It 'writes venue as an object with name, location and empty links' {
+            $script:Gig.venue.name | Should -Be 'Test Hall'
+            $script:Gig.venue.location | Should -Be 'Nowhere'
+            @($script:Gig.venue.links).Count | Should -Be 0
+        }
+
+        It 'writes each artist as an object with a name and empty links' {
+            @($script:Gig.artists).Count | Should -Be 1
+            $script:Gig.artists[0].name | Should -Be 'Act One'
+            @($script:Gig.artists[0].links).Count | Should -Be 0
+        }
+
+        It 'has no top-level location field' {
+            $script:Gig.PSObject.Properties.Name | Should -Not -Contain 'location'
+        }
+
+        It 'sets a 3-column layout' {
+            $script:Gig.layout.columns | Should -Be 3
+        }
+
+        It 'seeds the landscape into the centre column and the portrait into an outer column' {
+            $landscape = $script:Gig.images | Where-Object { $_.file -eq 'P1000001.jpg' }
+            $portrait = $script:Gig.images | Where-Object { $_.file -eq 'P1000002.jpg' }
+            $landscape.column | Should -Be 1
+            $portrait.column | Should -Be 0
+        }
+
+        It 'writes column values as integers, not floats' {
+            $raw = Get-Content (Join-Path $script:GigsDir "$($script:Slug).json") -Raw
+            $raw | Should -Not -Match '"column":\s*\d+\.\d'
+        }
+    }
+
     Context 'resulting JSON' {
         BeforeAll {
             $script:Slug = New-Slug -Prefix 'valid-json'

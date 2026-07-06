@@ -11,7 +11,7 @@ permalink: /
            width="{{ gig.coverImage.thumbWidth }}" height="{{ gig.coverImage.thumbHeight }}"
            loading="lazy" decoding="async">
       <h2>{{ gig.title }}</h2>
-      <p>{{ gig.venue }} · {{ gig.date | displayDate }}</p>
+      <p>{{ gig.venue.name }} · {{ gig.date | displayDate }}</p>
     </a>
   </li>
   {% endfor %}

@@ -2,28 +2,83 @@ import { readdir, readFile } from "node:fs/promises";
 import { join, basename } from "node:path";
 
 const PERMISSIONS = ["display-only", "editorial", "commercial"];
+export const DEFAULT_COLUMNS = 3;
+
+/** Validate an optional links array ([{ label, url }]). */
+function validateLinks(links, path, err) {
+  if (links === undefined) return;
+  if (!Array.isArray(links)) {
+    err(`${path}: "links" must be an array`);
+    return;
+  }
+  for (const [i, link] of links.entries()) {
+    if (typeof link?.label !== "string" || link.label.length === 0)
+      err(`${path}.links[${i}]: missing or empty "label"`);
+    if (typeof link?.url !== "string" || link.url.length === 0)
+      err(`${path}.links[${i}]: missing or empty "url"`);
+  }
+}
 
 /** Validate one parsed gig object. Returns [] when valid. */
 export function validateGig(gig, fileName) {
   const errors = [];
   const err = (m) => errors.push(`${fileName}: ${m}`);
 
-  for (const f of ["slug", "title", "date", "venue", "location", "cover"]) {
+  for (const f of ["slug", "title", "date", "cover"]) {
     if (typeof gig[f] !== "string" || gig[f].length === 0) err(`missing or empty "${f}"`);
   }
   if (gig.slug && !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(gig.slug)) err(`invalid slug "${gig.slug}"`);
   if (gig.slug && basename(fileName, ".json") !== gig.slug)
     err(`slug "${gig.slug}" does not match file name`);
   if (gig.date && !/^\d{4}-\d{2}-\d{2}$/.test(gig.date)) err(`invalid date "${gig.date}"`);
+
+  // venue: { name, location, links? }
+  if (typeof gig.venue !== "object" || gig.venue === null || Array.isArray(gig.venue)) {
+    err(`"venue" must be an object with "name" and "location"`);
+  } else {
+    if (typeof gig.venue.name !== "string" || gig.venue.name.length === 0) err(`venue: missing "name"`);
+    if (typeof gig.venue.location !== "string" || gig.venue.location.length === 0)
+      err(`venue: missing "location"`);
+    validateLinks(gig.venue.links, "venue", err);
+  }
+
+  // artists: [{ name, links? }]
   if (!Array.isArray(gig.artists) || gig.artists.length === 0) {
     err(`"artists" must be a non-empty array`);
   } else {
     for (const [i, artist] of gig.artists.entries()) {
-      if (typeof artist !== "string" || artist.length === 0) err(`artists[${i}]: must be a non-empty string`);
+      if (typeof artist !== "object" || artist === null || Array.isArray(artist)) {
+        err(`artists[${i}]: must be an object with "name"`);
+      } else {
+        if (typeof artist.name !== "string" || artist.name.length === 0) err(`artists[${i}]: missing "name"`);
+        validateLinks(artist.links, `artists[${i}]`, err);
+      }
     }
   }
+
   if (!PERMISSIONS.includes(gig.permission))
     err(`"permission" must be one of ${PERMISSIONS.join(", ")}`);
+
+  // layout: { columns, widths? } — optional; drives the valid range for image columns
+  let columns = DEFAULT_COLUMNS;
+  if (gig.layout !== undefined) {
+    if (typeof gig.layout !== "object" || gig.layout === null || Array.isArray(gig.layout)) {
+      err(`"layout" must be an object`);
+    } else {
+      if (!Number.isInteger(gig.layout.columns) || gig.layout.columns < 1) {
+        err(`layout: "columns" must be an integer >= 1`);
+      } else {
+        columns = gig.layout.columns;
+      }
+      if (gig.layout.widths !== undefined) {
+        if (!Array.isArray(gig.layout.widths) || gig.layout.widths.length !== columns) {
+          err(`layout: "widths" must be an array of length ${columns}`);
+        } else if (!gig.layout.widths.every((w) => typeof w === "number" && w > 0)) {
+          err(`layout: "widths" entries must be positive numbers`);
+        }
+      }
+    }
+  }
 
   if (!Array.isArray(gig.images) || gig.images.length === 0) {
     err(`"images" must be a non-empty array`);
@@ -35,6 +90,8 @@ export function validateGig(gig, fileName) {
       seen.add(img.file);
       if (!Number.isInteger(img.width) || img.width < 1) err(`images[${i}]: invalid "width"`);
       if (!Number.isInteger(img.height) || img.height < 1) err(`images[${i}]: invalid "height"`);
+      if (img.column !== undefined && (!Number.isInteger(img.column) || img.column < 0 || img.column >= columns))
+        err(`images[${i}]: "column" must be an integer between 0 and ${columns - 1}`);
     }
     if (gig.cover && !seen.has(gig.cover)) err(`cover "${gig.cover}" is not in images`);
   }
@@ -56,11 +113,9 @@ export async function loadGigs(dir = "gigs") {
     }
     const gigErrors = validateGig(gig, file);
     errors.push(...gigErrors);
-    // Only apply normalization if this gig has no validation errors
-    if (gigErrors.length === 0) {
-      gig.description ??= "";
-      gig.images?.sort((a, b) => a.file.localeCompare(b.file));   // display order = filename sort
-    }
+    // Array order IS display order (both stack order within a column and the
+    // lightbox next/prev sequence). Only default optional fields when valid.
+    if (gigErrors.length === 0) gig.description ??= "";
     gigs.push(gig);
   }
   if (errors.length) throw new Error(`Gig validation failed:\n  ${errors.join("\n  ")}`);

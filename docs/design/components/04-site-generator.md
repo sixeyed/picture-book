@@ -1,5 +1,11 @@
 # Component 4 — Site Generator: Eleventy Config, Data Layer, Templates
 
+> **Updated by [09-curatorial-control.md](09-curatorial-control.md) (2026-07-06):**
+> the data layer now resolves `layout`/`columnGroups`/`column`/`order`; `gig.njk`
+> renders a `.columns` layout and artist/venue link chips; `index.njk` uses
+> `gig.venue.name`. The data-layer and template snippets below predate that — 09 §2–3
+> and the live `src/` files are current.
+
 Renders the static HTML: home page (gig cards), one page per gig, about page.
 Eleventy v3 (ESM) with Nunjucks templates.
 

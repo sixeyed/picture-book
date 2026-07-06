@@ -1,5 +1,11 @@
 # Component 1 — Content Model: Gig Schema + Loader
 
+> **Superseded in part by [09-curatorial-control.md](09-curatorial-control.md)
+> (2026-07-06):** `venue` and `artists` are now objects with optional `links`;
+> top-level `location` is gone; `layout` + per-image `column` were added; and the
+> loader no longer sorts images (array order is authoritative). The field table and
+> schema below show the original shape — 09 and `schema/gig.schema.json` are current.
+
 The single source of truth for site content: one JSON file per gig, a JSON Schema
 that documents and validates it, and a shared Node module that every other tool uses
 to load gigs consistently.

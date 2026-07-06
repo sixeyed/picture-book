@@ -16,19 +16,29 @@
 ---
 <h1>{{ gig.title }}</h1>
 <p class="meta">
-  {{ gig.artists | join(" · ") }} · {{ gig.venue }} · {{ gig.location }} · {{ gig.date | displayDate }}
+  {%- for a in gig.artists -%}
+    {{ a.name }}
+    {%- for l in a.links %} <a class="chip" href="{{ l.url }}">{{ l.label }}</a>{% endfor -%}
+    {%- if not loop.last %} · {% endif -%}
+  {%- endfor %} ·
+  {{ gig.venue.name }}
+  {%- for l in gig.venue.links %} <a class="chip" href="{{ l.url }}">{{ l.label }}</a>{% endfor %} ·
+  {{ gig.venue.location }} · {{ gig.date | displayDate }}
 </p>
 {% if gig.description %}<p class="blurb">{{ gig.description }}</p>{% endif %}
-<ul class="grid" data-download="{{ 'true' if gig.permission != 'display-only' else 'false' }}">
-  {% for img in gig.images %}
-  <li>
+<div class="columns" data-download="{{ 'true' if gig.permission != 'display-only' else 'false' }}">
+  {% for col in gig.columnGroups %}
+  <div class="col" style="flex: {{ gig.layout.widths[loop.index0] }}">
+    {% for img in col %}
     <a class="thumb" href="/img/web/{{ gig.slug }}/{{ img.file }}"
+       data-order="{{ img.order }}"
        data-stem="{{ img.stem }}"
        {% if gig.permission != "display-only" %}data-full="/img/full/{{ gig.slug }}/{{ img.file }}"{% endif %}
        style="aspect-ratio: {{ img.width }} / {{ img.height }}">
       <img src="/thumbs/{{ gig.slug }}/{{ img.file }}" alt="{{ gig.title }}"
            width="{{ img.thumbWidth }}" height="{{ img.thumbHeight }}" loading="lazy" decoding="async">
     </a>
-  </li>
+    {% endfor %}
+  </div>
   {% endfor %}
-</ul>
+</div>

@@ -19,16 +19,24 @@ const EDITORIAL_GIG = {
   slug: "editorial-gig",
   title: "Editorial Gig",
   date: "2026-06-21",
-  venue: "The Foundry",
-  location: "Sheffield, UK",
-  artists: ["The Editorial Band"],
+  venue: {
+    name: "The Foundry",
+    location: "Sheffield, UK",
+    links: [{ label: "Website", url: "https://the-foundry.example.com" }],
+  },
+  artists: [
+    { name: "The Editorial Band", links: [{ label: "Instagram", url: "https://instagram.example.com/editorialband" }] },
+  ],
   permission: "editorial",
   description: "An editorial blurb about the gig.",
-  cover: "P1000001.jpg",
+  cover: "P1000003.jpg",
+  layout: { columns: 3, widths: [1, 1, 1] },
   images: [
-    // deliberately out of filename order in the JSON array
+    // deliberately out of filename order in the JSON array — array order is authoritative
+    { file: "P1000003.jpg", width: 3000, height: 2000, column: 0 },
+    { file: "P1000001.jpg", width: 2000, height: 3000, column: 2 },
+    // no explicit column: landscape falls back to the centre column
     { file: "P1000002.jpg", width: 4000, height: 3000 },
-    { file: "P1000001.jpg", width: 3000, height: 2000 },
   ],
 };
 
@@ -36,9 +44,8 @@ const SPECIAL_CHARS_GIG = {
   slug: "special-chars-gig",
   title: 'Rock & Roll "Night"',
   date: "2024-03-01",
-  venue: "The Cellar",
-  location: "Manchester, UK",
-  artists: ["The Ampersands"],
+  venue: { name: "The Cellar", location: "Manchester, UK" },
+  artists: [{ name: "The Ampersands" }],
   permission: "editorial",
   cover: "P3000001.jpg",
   images: [{ file: "P3000001.jpg", width: 3000, height: 2000 }],
@@ -48,9 +55,8 @@ const DISPLAY_ONLY_GIG = {
   slug: "display-only-gig",
   title: "Display Only Gig",
   date: "2025-01-15",
-  venue: "The Warehouse",
-  location: "Leeds, UK",
-  artists: ["The Display Band"],
+  venue: { name: "The Warehouse", location: "Leeds, UK" },
+  artists: [{ name: "The Display Band" }],
   permission: "display-only",
   cover: "P2000001.jpg",
   images: [{ file: "P2000001.jpg", width: 5000, height: 3333 }],
@@ -108,25 +114,34 @@ test("home page: newer gig's card appears before older gig's", async () => {
   });
 });
 
-test("home page: card shows cover thumb URL, title, venue and formatted date", async () => {
+test("home page: card shows cover thumb URL, title, venue name and formatted date", async () => {
   await withBuiltSite(async (dir) => {
     const html = await readBuild(dir, "index.html");
-    assert(html.includes("/thumbs/editorial-gig/P1000001.jpg"), "cover thumb URL for editorial gig");
+    assert(html.includes("/thumbs/editorial-gig/P1000003.jpg"), "cover thumb URL for editorial gig");
     assert(html.includes("Editorial Gig"), "title");
-    assert(html.includes("The Foundry"), "venue");
+    assert(html.includes("The Foundry"), "venue name");
+    assert(!html.includes("[object Object]"), "venue must render its name, not the object itself");
     assert(html.includes("21 June 2026"), "formatted date");
   });
 });
 
-test("gig page: one a.thumb per image, in filename order regardless of JSON array order", async () => {
+test("gig page grid: columns container, one .col per configured column, one a.thumb per image", async () => {
   await withBuiltSite(async (dir) => {
     const html = await readBuild(dir, "editorial-gig/index.html");
+    assert(html.includes('<div class="columns" data-download="true">'), "gallery container should carry columns class and data-download");
+    const colCount = (html.match(/<div class="col"/g) || []).length;
+    assert.equal(colCount, 3, "expected one .col block per configured layout column");
     const thumbCount = (html.match(/class="thumb"/g) || []).length;
-    assert.equal(thumbCount, 2, "expected one a.thumb per image");
-    const idx1 = html.indexOf("P1000001.jpg");
-    const idx2 = html.indexOf("P1000002.jpg");
-    assert(idx1 >= 0 && idx2 >= 0);
-    assert(idx1 < idx2, "P1000001.jpg (filename order) should appear before P1000002.jpg despite JSON array order");
+    assert.equal(thumbCount, 3, "expected exactly one a.thumb per image");
+  });
+});
+
+test("gig page: data-order values are the authored array indices", async () => {
+  await withBuiltSite(async (dir) => {
+    const html = await readBuild(dir, "editorial-gig/index.html");
+    for (let i = 0; i < 3; i++) {
+      assert(html.includes(`data-order="${i}"`), `data-order="${i}" should be present on some thumb`);
+    }
   });
 });
 
@@ -143,11 +158,11 @@ test("blurb: gig with description renders it, gig without description renders no
 test("gig page grid: markup contract matches overview §3.6 exactly", async () => {
   await withBuiltSite(async (dir) => {
     const html = await readBuild(dir, "editorial-gig/index.html");
-    assert(html.includes('href="/img/web/editorial-gig/P1000001.jpg"'), "href points at web rendition");
-    assert(html.includes('data-stem="P1000001"'), "data-stem has no extension");
-    assert(html.includes('data-full="/img/full/editorial-gig/P1000001.jpg"'), "data-full points at full rendition");
+    assert(html.includes('href="/img/web/editorial-gig/P1000003.jpg"'), "href points at web rendition");
+    assert(html.includes('data-stem="P1000003"'), "data-stem has no extension");
+    assert(html.includes('data-full="/img/full/editorial-gig/P1000003.jpg"'), "data-full points at full rendition");
     assert(html.includes("style=\"aspect-ratio: 3000 / 2000\""), "aspect-ratio style from width/height");
-    assert(/<img src="\/thumbs\/editorial-gig\/P1000001\.jpg" alt="Editorial Gig"\s+width="\d+" height="\d+" loading="lazy" decoding="async">/.test(html), "img has width/height/loading/decoding");
+    assert(/<img src="\/thumbs\/editorial-gig\/P1000003\.jpg" alt="Editorial Gig"\s+width="\d+" height="\d+" loading="lazy" decoding="async">/.test(html), "img has width/height/loading/decoding");
   });
 });
 
@@ -157,7 +172,7 @@ test("data-full is display-only-conditional: absent for display-only gigs, prese
     assert(!displayHtml.includes("data-full"), "display-only gig page must not leak the full-res URL shape");
 
     const editorialHtml = await readBuild(dir, "editorial-gig/index.html");
-    assert(editorialHtml.includes('data-full="/img/full/editorial-gig/P1000001.jpg"'), "editorial gig page must include data-full");
+    assert(editorialHtml.includes('data-full="/img/full/editorial-gig/P1000003.jpg"'), "editorial gig page must include data-full");
   });
 });
 
@@ -171,10 +186,25 @@ test("permission: editorial gig has data-download=true, display-only has data-do
   });
 });
 
+test("links: artist and venue link chips render for the linked gig", async () => {
+  await withBuiltSite(async (dir) => {
+    const html = await readBuild(dir, "editorial-gig/index.html");
+    assert(html.includes('<a class="chip" href="https://instagram.example.com/editorialband">Instagram</a>'), "artist link chip");
+    assert(html.includes('<a class="chip" href="https://the-foundry.example.com">Website</a>'), "venue link chip");
+  });
+});
+
+test("links: gig without any links renders no chips", async () => {
+  await withBuiltSite(async (dir) => {
+    const html = await readBuild(dir, "display-only-gig/index.html");
+    assert(!html.includes('class="chip"'), "no chip elements when neither artist nor venue has links");
+  });
+});
+
 test("OG tags: gig page has og:image ending /img/web/<slug>/<cover>", async () => {
   await withBuiltSite(async (dir) => {
     const html = await readBuild(dir, "editorial-gig/index.html");
-    assert(/<meta property="og:image" content="[^"]*\/img\/web\/editorial-gig\/P1000001\.jpg"/.test(html));
+    assert(/<meta property="og:image" content="[^"]*\/img\/web\/editorial-gig\/P1000003\.jpg"/.test(html));
   });
 });
 

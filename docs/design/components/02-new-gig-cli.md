@@ -1,5 +1,10 @@
 # Component 2 — `new-gig.ps1` Scaffolder
 
+> **Updated by [09-curatorial-control.md](09-curatorial-control.md) (2026-07-06):**
+> the emitted JSON now writes `venue`/`artists` as objects with empty `links`, a
+> `layout: { columns: 3 }`, and an orientation-seeded integer `column` per image. The
+> stub example below predates that — see 09 §5 for the current output.
+
 Turns a folder of full-res darktable exports into a ready-to-edit gig: copies the
 files into `originals/<slug>/` and writes a `gigs/<slug>.json` stub with dimensions
 filled in. The user then edits title/venue/description.

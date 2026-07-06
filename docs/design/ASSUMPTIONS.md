@@ -43,10 +43,18 @@ implementation starts. Items marked **§11** resolve the spec's open decisions.
 8. **Thumbnails: in the Pages bundle.** Headroom check: Pages caps deployments at
    20,000 files; at ~30 images/gig that's ~600 gigs before this needs revisiting.
 
-9. **Ordering: automatic.** Display order is a filename sort (≈ capture order for
-   camera files), imposed by the loader (`loadGigs`) so the JSON array order never
-   matters. Note: this means re-ordering requires renaming files; if hand-curated
-   order is ever wanted, revert to array-order-authoritative in `gigs.mjs`.
+9. **Ordering: manual (REVERSED 2026-07-06).** Originally auto (filename sort). The
+   curatorial-control feature made the **JSON array order authoritative** — it is both
+   the stack order within a column and the lightbox next/prev sequence; the loader no
+   longer sorts. `new-gig.ps1` still seeds the array in filename order as a starting
+   point. See `components/09-curatorial-control.md`.
+
+9a. **Layout & metadata (curatorial control, 2026-07-06).** Gigs gained an explicit
+    column layout (`layout` + per-image `column`, flexbox columns, portraits-flank /
+    landscapes-centre default) and linkable entities (`venue` and `artists` are now
+    objects with optional `links`; top-level `location` folded into `venue`). Full
+    design and tradeoffs (mobile order, hero-via-widths, no cross-column span) in
+    `components/09-curatorial-control.md`.
 
 ## Operational assumptions
 

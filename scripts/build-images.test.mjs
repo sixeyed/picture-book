@@ -29,9 +29,8 @@ function makeGig(overrides = {}) {
     slug: "test-gig",
     title: "Test Gig",
     date: "2026-06-21",
-    venue: "The Foundry",
-    location: "Sheffield, UK",
-    artists: ["The Example Band"],
+    venue: { name: "The Foundry", location: "Sheffield, UK" },
+    artists: [{ name: "The Example Band" }],
     permission: "editorial",
     cover: "P1000001.jpg",
     images: [

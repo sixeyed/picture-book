@@ -1,5 +1,10 @@
 # Component 5 — Frontend: `site.css` + `gallery.js`
 
+> **Updated by [09-curatorial-control.md](09-curatorial-control.md) (2026-07-06):**
+> the gig grid is now a flexbox `.columns`/`.col` layout (not `.grid` masonry);
+> `gallery.js` binds to `.columns` and sorts thumbs by `data-order`; `.meta .chip`
+> link pills were added. Sections below referring to `.grid` predate that — see 09 §4.
+
 The look (dark, photos-first, per high-level §8) and the lightbox behaviour. Pure
 CSS + vanilla JS, no frameworks, no build step — these files ship as written.
 

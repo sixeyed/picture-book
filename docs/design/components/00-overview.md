@@ -22,6 +22,7 @@ in [`../ASSUMPTIONS.md`](../ASSUMPTIONS.md).
 | 6 | [06-image-function.md](06-image-function.md) | `functions/img/[[path]].js` + `wrangler.jsonc` | — |
 | 7 | [07-publish-pipeline.md](07-publish-pipeline.md) | `scripts/publish.ps1`, `.gitignore`, one-time Cloudflare setup | 3, 4, 6 |
 | 8 | [08-docker-local.md](08-docker-local.md) | Docker local stack: `Dockerfile`, `docker-compose.yml`, `scripts/test.ps1`, `scripts/dev-seed.ps1` | 3, 4, 6 |
+| 9 | [09-curatorial-control.md](09-curatorial-control.md) | Curatorial control: explicit column layout + linkable artist/venue metadata (a change across 1, 2, 4, 5) | 1, 2, 4, 5 |
 
 Build order for agents: **1 → (2, 3, 4, 6 in parallel) → 5 → 7 → 8.**
 Components 2, 3, 4 only share the content model; 6 shares only the R2 key scheme.
@@ -143,59 +144,77 @@ original size). `full` is staged **only** when the gig's `permission` is not
 `<slug>/<file>`, and cache headers are immutable, so a re-edited photo must be given
 a new filename (ASSUMPTIONS.md #7).
 
-### 3.5 Gig content model (summary — full definition in 01)
+### 3.5 Gig content model (summary — full definition in 01, feature spec in 09)
 
 ```json
 {
   "slug": "summer-festival-2026",
   "title": "Summer Festival",
   "date": "2026-06-21",
-  "venue": "The Foundry",
-  "location": "Sheffield, UK",
-  "artists": ["The Example Band"],
+  "venue": { "name": "The Foundry", "location": "Sheffield, UK",
+             "links": [{ "label": "Website", "url": "https://…" }] },
+  "artists": [
+    { "name": "The Example Band",
+      "links": [{ "label": "Instagram", "url": "https://…" }] }
+  ],
   "permission": "display-only",
   "description": "Headline set under the big top — shot from the pit.",
   "cover": "P1000063.jpg",
+  "layout": { "columns": 3, "widths": [1, 1.4, 1] },
   "images": [
-    { "file": "P1000063.jpg", "width": 6000, "height": 4000 }
+    { "file": "P1000063.jpg", "width": 6000, "height": 4000, "column": 1 }
   ]
 }
 ```
 
-- `description` — optional per-gig blurb (the only caption text on the site; there
-  are no per-image captions — spec §11.3).
-- Display order is **filename sort** (≈ capture order for camera files), applied by
-  the loader; the order of the `images` array is not significant (spec §11.5).
-- `width`/`height` are the original's pixel dimensions (replaces the spec's
-  `orientation` — derivable, and enables `aspect-ratio` CSS; ASSUMPTIONS.md #2).
+- `venue` is an **object** (`name`, `location`, optional `links`); `artists` is an
+  **array of objects** (`name`, optional `links`). `links` = `[{ label, url }]`.
+  There is no top-level `location`. (Curatorial-control feature — see 09.)
+- **Array order IS display order** — both the stack order within a column and the
+  lightbox next/prev sequence. The loader no longer sorts by filename (reverses the
+  old "auto ordering" call — ASSUMPTIONS.md #9).
+- `layout` (optional) = `{ columns, widths? }`; each image may carry an optional
+  `column` (0-based). Both default via the data layer (columns = 3; portraits flank
+  the outer columns, landscapes stack in the centre). Full definition in 09.
+- `description` — optional per-gig blurb (the only caption text; no per-image captions).
+- `width`/`height` are the original's pixel dimensions (enables `aspect-ratio` CSS).
 - `permission` ∈ `display-only | editorial | commercial`; anything other than
   `display-only` shows the full-res download link and stages `full/` to R2.
 
 ### 3.6 Gallery markup contract (produced by 4, consumed by 5)
 
-`gig.njk` must render each photo as:
+`gig.njk` renders the gallery as a row of columns. Each image is placed into its
+assigned column; within a column, images stack in authored order:
 
 ```html
-<ul class="grid" data-download="{{ 'true' if gig.permission != 'display-only' else 'false' }}">
-  <li>
+<div class="columns" data-download="{{ 'true' if gig.permission != 'display-only' else 'false' }}">
+  {% for col in gig.columnGroups %}
+  <div class="col" style="flex: {{ gig.layout.widths[loop.index0] }}">
+    {% for img in col %}
     <a class="thumb" href="/img/web/{{ gig.slug }}/{{ img.file }}"
+       data-order="{{ img.order }}"
        data-stem="{{ img.stem }}"
        {% if gig.permission != "display-only" %}data-full="/img/full/{{ gig.slug }}/{{ img.file }}"{% endif %}
        style="aspect-ratio: {{ img.width }} / {{ img.height }}">
       <img src="/thumbs/{{ gig.slug }}/{{ img.file }}" alt="{{ gig.title }}"
            width="{{ img.thumbWidth }}" height="{{ img.thumbHeight }}" loading="lazy" decoding="async">
     </a>
-  </li>
-</ul>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
 ```
 
-`data-full` is emitted only when `gig.permission != "display-only"` — a
-display-only gig's markup must not leak the full-res URL shape at all, not just
-suppress the download link.
-
-`gallery.js` binds to `a.thumb`; with JS disabled the anchors still open the `web`
-rendition directly. `img.stem`, `img.thumbWidth`, `img.thumbHeight` are computed by
-the data layer (component 4).
+- `data-full` is emitted only when `gig.permission != "display-only"` — a
+  display-only gig's markup must not leak the full-res URL shape at all.
+- `data-order` is the image's authored index in the flat `images` array.
+  `gallery.js` binds to `.columns`, gathers all `a.thumb`, and **sorts them by
+  `data-order`** so the lightbox next/prev sequence follows authored order, not the
+  column-grouped DOM order.
+- With JS disabled the anchors still open the `web` rendition directly.
+- `img.order`, `img.stem`, `img.thumbWidth`, `img.thumbHeight`, `gig.columnGroups`
+  and `gig.layout` (resolved `{ columns, widths }`) are computed by the data layer
+  (component 4). Full definition of the column engine in 09.
 
 ### 3.7 Build & publish flow
 
