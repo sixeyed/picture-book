@@ -4,7 +4,7 @@ import { mkdtemp, writeFile, mkdir, stat, utimes, rm, readFile } from "node:fs/p
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
-import { run } from "./build-images.mjs";
+import { run, thumbName } from "./build-images.mjs";
 
 // build-images.mjs resolves gigs/originals/build/.r2-stage relative to
 // process.cwd(), so every test chdir's into a fresh temp workspace and
@@ -94,10 +94,12 @@ test("fresh build, editorial gig: thumb + web + full exist for each image, corre
     assert.equal(result.exitCode, 0);
 
     for (const file of ["P1000001.jpg", "P1000002.jpg"]) {
-      const thumbPath = join("build", "thumbs", gig.slug, file);
+      const thumb800Path = join("build", "thumbs", gig.slug, thumbName(file, 800));
+      const thumb1600Path = join("build", "thumbs", gig.slug, thumbName(file, 1600));
       const webPath = join(".r2-stage", "web", gig.slug, file);
       const fullPath = join(".r2-stage", "full", gig.slug, file);
-      assert.ok(await exists(thumbPath), `${thumbPath} should exist`);
+      assert.ok(await exists(thumb800Path), `${thumb800Path} should exist`);
+      assert.ok(await exists(thumb1600Path), `${thumb1600Path} should exist`);
       assert.ok(await exists(webPath), `${webPath} should exist`);
       assert.ok(await exists(fullPath), `${fullPath} should exist`);
 
@@ -105,8 +107,11 @@ test("fresh build, editorial gig: thumb + web + full exist for each image, corre
       const fullBytes = await readFile(fullPath);
       assert.ok(srcBytes.equals(fullBytes), "full rendition should be byte-identical to the original");
 
-      const thumbMeta = await sharp(thumbPath).metadata();
-      assert.equal(Math.max(thumbMeta.width, thumbMeta.height), 1600, "thumb long edge should be 1600");
+      const thumb800Meta = await sharp(thumb800Path).metadata();
+      assert.equal(Math.max(thumb800Meta.width, thumb800Meta.height), 800, "800 thumb long edge should be 800");
+
+      const thumb1600Meta = await sharp(thumb1600Path).metadata();
+      assert.equal(Math.max(thumb1600Meta.width, thumb1600Meta.height), 1600, "1600 thumb long edge should be 1600");
 
       const webMeta = await sharp(webPath).metadata();
       assert.equal(Math.max(webMeta.width, webMeta.height), 2048, "web long edge should be 2048");
@@ -125,7 +130,8 @@ test("display-only gig: no .r2-stage/full/<slug>/ created", async () => {
     assert.equal(result.exitCode, 0);
 
     assert.ok(!(await exists(join(".r2-stage", "full", gig.slug))), "full dir should not exist");
-    assert.ok(await exists(join("build", "thumbs", gig.slug, "P1000001.jpg")));
+    assert.ok(await exists(join("build", "thumbs", gig.slug, thumbName("P1000001.jpg", 800))));
+    assert.ok(await exists(join("build", "thumbs", gig.slug, thumbName("P1000001.jpg", 1600))));
     assert.ok(await exists(join(".r2-stage", "web", gig.slug, "P1000001.jpg")));
   });
 });
@@ -139,9 +145,13 @@ test("400x300 source: thumb output remains 400x300 (no upscale)", async () => {
     const result = await run([]);
     assert.equal(result.exitCode, 0);
 
-    const thumbMeta = await sharp(join("build", "thumbs", gig.slug, "small.jpg")).metadata();
-    assert.equal(thumbMeta.width, 400);
-    assert.equal(thumbMeta.height, 300);
+    const thumb800Meta = await sharp(join("build", "thumbs", gig.slug, thumbName("small.jpg", 800))).metadata();
+    assert.equal(thumb800Meta.width, 400);
+    assert.equal(thumb800Meta.height, 300);
+
+    const thumb1600Meta = await sharp(join("build", "thumbs", gig.slug, thumbName("small.jpg", 1600))).metadata();
+    assert.equal(thumb1600Meta.width, 400);
+    assert.equal(thumb1600Meta.height, 300);
   });
 });
 
@@ -154,11 +164,15 @@ test("EXIF orientation 6 source: output width/height are the rotated dimensions"
     const result = await run([]);
     assert.equal(result.exitCode, 0);
 
-    const thumbMeta = await sharp(join("build", "thumbs", gig.slug, "rotated.jpg")).metadata();
+    const thumb1600Meta = await sharp(join("build", "thumbs", gig.slug, thumbName("rotated.jpg", 1600))).metadata();
     // Raw pixels are 3000x2000 but orientation 6 rotates 90deg on display,
     // so the baked output should be portrait (narrower than it is tall).
-    assert.ok(thumbMeta.height > thumbMeta.width, "rotated thumb should be portrait");
-    assert.equal(Math.max(thumbMeta.width, thumbMeta.height), 1600);
+    assert.ok(thumb1600Meta.height > thumb1600Meta.width, "rotated 1600 thumb should be portrait");
+    assert.equal(Math.max(thumb1600Meta.width, thumb1600Meta.height), 1600);
+
+    const thumb800Meta = await sharp(join("build", "thumbs", gig.slug, thumbName("rotated.jpg", 800))).metadata();
+    assert.ok(thumb800Meta.height > thumb800Meta.width, "rotated 800 thumb should be portrait");
+    assert.equal(Math.max(thumb800Meta.width, thumb800Meta.height), 800);
   });
 });
 
@@ -170,7 +184,7 @@ test("second run, nothing changed: zero files regenerated", async () => {
     await make3000x2000(gig.slug, "P1000002.jpg");
 
     await run([]);
-    const thumbPath = join("build", "thumbs", gig.slug, "P1000001.jpg");
+    const thumbPath = join("build", "thumbs", gig.slug, thumbName("P1000001.jpg", 800));
     const before = (await stat(thumbPath)).mtimeMs;
 
     const result = await run([]);
@@ -192,22 +206,30 @@ test("source touched (utimes newer): only that image's renditions regenerate", a
     await make3000x2000(gig.slug, "P1000002.jpg");
 
     await run([]);
-    const thumb1 = join("build", "thumbs", gig.slug, "P1000001.jpg");
-    const thumb2 = join("build", "thumbs", gig.slug, "P1000002.jpg");
-    const before1 = (await stat(thumb1)).mtimeMs;
-    const before2 = (await stat(thumb2)).mtimeMs;
+    const thumb1_800 = join("build", "thumbs", gig.slug, thumbName("P1000001.jpg", 800));
+    const thumb1_1600 = join("build", "thumbs", gig.slug, thumbName("P1000001.jpg", 1600));
+    const thumb2_800 = join("build", "thumbs", gig.slug, thumbName("P1000002.jpg", 800));
+    const thumb2_1600 = join("build", "thumbs", gig.slug, thumbName("P1000002.jpg", 1600));
+    const before1_800 = (await stat(thumb1_800)).mtimeMs;
+    const before1_1600 = (await stat(thumb1_1600)).mtimeMs;
+    const before2_800 = (await stat(thumb2_800)).mtimeMs;
+    const before2_1600 = (await stat(thumb2_1600)).mtimeMs;
 
     // Bump the mtime of source 1 into the future so it looks newer than its output.
     const future = new Date(Date.now() + 10_000);
     await utimes(src1, future, future);
 
     const result = await run([]);
-    assert.equal(result.counts.thumb, 1, "only one thumb should regenerate");
+    assert.equal(result.counts.thumb, 2, "both sizes of the touched image's thumb should regenerate");
 
-    const after1 = (await stat(thumb1)).mtimeMs;
-    const after2 = (await stat(thumb2)).mtimeMs;
-    assert.ok(after1 > before1, "touched image's thumb should regenerate");
-    assert.equal(after2, before2, "untouched image's thumb should be unchanged");
+    const after1_800 = (await stat(thumb1_800)).mtimeMs;
+    const after1_1600 = (await stat(thumb1_1600)).mtimeMs;
+    const after2_800 = (await stat(thumb2_800)).mtimeMs;
+    const after2_1600 = (await stat(thumb2_1600)).mtimeMs;
+    assert.ok(after1_800 > before1_800, "touched image's 800 thumb should regenerate");
+    assert.ok(after1_1600 > before1_1600, "touched image's 1600 thumb should regenerate");
+    assert.equal(after2_800, before2_800, "untouched image's 800 thumb should be unchanged");
+    assert.equal(after2_1600, before2_1600, "untouched image's 1600 thumb should be unchanged");
   });
 });
 
@@ -232,10 +254,12 @@ test("image removed from JSON, staged file exists: staged file removed on next r
     await make3000x2000(gig.slug, "P1000002.jpg");
     await run([]);
 
-    const thumbPath = join("build", "thumbs", gig.slug, "P1000002.jpg");
+    const thumbPath800 = join("build", "thumbs", gig.slug, thumbName("P1000002.jpg", 800));
+    const thumbPath1600 = join("build", "thumbs", gig.slug, thumbName("P1000002.jpg", 1600));
     const webPath = join(".r2-stage", "web", gig.slug, "P1000002.jpg");
     const fullPath = join(".r2-stage", "full", gig.slug, "P1000002.jpg");
-    assert.ok(await exists(thumbPath));
+    assert.ok(await exists(thumbPath800));
+    assert.ok(await exists(thumbPath1600));
 
     // Remove the image from the gig JSON (file on disk may remain in originals/).
     const updatedGig = makeGig({
@@ -246,7 +270,8 @@ test("image removed from JSON, staged file exists: staged file removed on next r
 
     const result = await run([]);
     assert.equal(result.exitCode, 0);
-    assert.ok(!(await exists(thumbPath)), "orphaned thumb should be removed");
+    assert.ok(!(await exists(thumbPath800)), "orphaned 800 thumb should be removed");
+    assert.ok(!(await exists(thumbPath1600)), "orphaned 1600 thumb should be removed");
     assert.ok(!(await exists(webPath)), "orphaned web rendition should be removed");
     assert.ok(!(await exists(fullPath)), "orphaned full copy should be removed");
   });
@@ -283,7 +308,8 @@ test("--gig <slug>: other gigs' images untouched", async () => {
     const result = await run(["--gig", "gig-a"]);
     assert.equal(result.exitCode, 0);
 
-    assert.ok(await exists(join("build", "thumbs", "gig-a", "P1000001.jpg")));
+    assert.ok(await exists(join("build", "thumbs", "gig-a", thumbName("P1000001.jpg", 800))));
+    assert.ok(await exists(join("build", "thumbs", "gig-a", thumbName("P1000001.jpg", 1600))));
     assert.ok(!(await exists(join("build", "thumbs", "gig-b"))), "gig-b thumbs dir should not exist");
     assert.ok(!(await exists(join(".r2-stage", "web", "gig-b"))), "gig-b web dir should not exist");
   });
@@ -325,7 +351,8 @@ test("corrupt source jpeg: exit 1, message names the file, other images still pr
     assert.match(result.message, /test-gig\/P1000002\.jpg/, "failure message should name the corrupt file");
 
     // The healthy image's renditions were still produced.
-    assert.ok(await exists(join("build", "thumbs", gig.slug, "P1000001.jpg")));
+    assert.ok(await exists(join("build", "thumbs", gig.slug, thumbName("P1000001.jpg", 800))));
+    assert.ok(await exists(join("build", "thumbs", gig.slug, thumbName("P1000001.jpg", 1600))));
     assert.ok(await exists(join(".r2-stage", "web", gig.slug, "P1000001.jpg")));
     assert.ok(await exists(join(".r2-stage", "full", gig.slug, "P1000001.jpg")));
   });

@@ -171,6 +171,7 @@ header a:first-child {
 .thumb {
   display: block;
   position: relative;
+  overflow: hidden; /* hard guard: an image can never spill its frame */
 }
 
 .thumb img {

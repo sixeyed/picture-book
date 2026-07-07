@@ -1,6 +1,7 @@
 import { loadGigs, DEFAULT_COLUMNS } from "../../scripts/lib/gigs.mjs";
 
-const THUMB_EDGE = 1600; // must match the thumb rendition edge in build-images.mjs
+// Must match THUMB_SIZES in scripts/build-images.mjs (long edges, ascending).
+const THUMB_SIZES = [800, 1600];
 
 export default async function () {
   const gigs = await loadGigs("gigs");
@@ -19,9 +20,20 @@ export default async function () {
     gig.images.forEach((img, i) => {
       img.order = i;
       img.stem = img.file.replace(/\.[^.]+$/, "");
-      const scale = Math.min(1, THUMB_EDGE / Math.max(img.width, img.height));
-      img.thumbWidth = Math.round(img.width * scale);
-      img.thumbHeight = Math.round(img.height * scale);
+
+      // Responsive thumbnails: one entry per THUMB_SIZES, `w` = the variant's
+      // actual pixel width so the browser can pick against the `sizes` hint.
+      const maxEdge = Math.max(img.width, img.height);
+      const variants = THUMB_SIZES.map((edge) => {
+        const scale = Math.min(1, edge / maxEdge);
+        return { url: `/thumbs/${gig.slug}/${img.stem}-${edge}.jpg`, w: Math.round(img.width * scale) };
+      });
+      img.thumbSrc = variants[0].url; // smallest = safe fallback for no-srcset
+      img.thumbSrcset = variants.map((v) => `${v.url} ${v.w}w`).join(", ");
+      // width/height attrs (for aspect-ratio / no CLS) from the largest variant
+      const largeScale = Math.min(1, THUMB_SIZES[THUMB_SIZES.length - 1] / maxEdge);
+      img.thumbWidth = Math.round(img.width * largeScale);
+      img.thumbHeight = Math.round(img.height * largeScale);
 
       let col = img.column;
       if (!Number.isInteger(col) || col < 0 || col >= columns) {

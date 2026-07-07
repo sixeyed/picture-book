@@ -117,7 +117,12 @@ test("home page: newer gig's card appears before older gig's", async () => {
 test("home page: card shows cover thumb URL, title, venue name and formatted date", async () => {
   await withBuiltSite(async (dir) => {
     const html = await readBuild(dir, "index.html");
-    assert(html.includes("/thumbs/editorial-gig/P1000003.jpg"), "cover thumb URL for editorial gig");
+    assert(html.includes("/thumbs/editorial-gig/P1000003-800.jpg"), "cover thumb URL (800 variant) for editorial gig");
+    assert(
+      html.includes("/thumbs/editorial-gig/P1000003-800.jpg 800w") &&
+        html.includes("/thumbs/editorial-gig/P1000003-1600.jpg 1600w"),
+      "cover srcset should include both the 800w and 1600w variants"
+    );
     assert(html.includes("Editorial Gig"), "title");
     assert(html.includes("The Foundry"), "venue name");
     assert(!html.includes("[object Object]"), "venue must render its name, not the object itself");
@@ -162,7 +167,15 @@ test("gig page grid: markup contract matches overview §3.6 exactly", async () =
     assert(html.includes('data-stem="P1000003"'), "data-stem has no extension");
     assert(html.includes('data-full="/img/full/editorial-gig/P1000003.jpg"'), "data-full points at full rendition");
     assert(html.includes("style=\"aspect-ratio: 3000 / 2000\""), "aspect-ratio style from width/height");
-    assert(/<img src="\/thumbs\/editorial-gig\/P1000003\.jpg" alt="Editorial Gig"\s+width="\d+" height="\d+" loading="lazy" decoding="async">/.test(html), "img has width/height/loading/decoding");
+    assert(
+      /<img src="\/thumbs\/editorial-gig\/P1000003-800\.jpg" srcset="[^"]*"\s+sizes="[^"]*"\s+alt="Editorial Gig"\s+width="\d+" height="\d+" loading="lazy" decoding="async">/.test(html),
+      "img has 800 src, srcset, sizes, width/height/loading/decoding"
+    );
+    assert(
+      html.includes("/thumbs/editorial-gig/P1000003-800.jpg 800w") &&
+        html.includes("/thumbs/editorial-gig/P1000003-1600.jpg 1600w"),
+      "srcset should include both the 800w and 1600w variants"
+    );
   });
 });
 

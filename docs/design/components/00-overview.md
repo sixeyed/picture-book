@@ -134,8 +134,12 @@ with `web/` or `full/`.
 
 | Rendition | Long edge | JPEG quality | Metadata | Output path |
 |---|---|---|---|---|
-| `thumb` | 1600 px | 80 | stripped | `build/thumbs/<slug>/<file>` |
+| `thumb` | 800 **and** 1600 px | 80 | stripped | `build/thumbs/<slug>/<stem>-<edge>.jpg` |
 | `web` | 2048 px | 85 | stripped | `.r2-stage/web/<slug>/<file>` |
+
+Two thumbnail sizes are generated per image for a responsive `srcset` (small/1x
+vs hi-DPI/2x); the grid `<img>` lists both with `w` descriptors + a `sizes` hint,
+so phones fetch the 800 and retina desktops the 1600. See 09 §6a.
 | `full` | original bytes, untouched copy | — | as exported | `.r2-stage/full/<slug>/<file>` |
 
 Never upscale (if the original's long edge is smaller than the target, copy at

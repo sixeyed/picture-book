@@ -35,7 +35,9 @@
        data-stem="{{ img.stem }}"
        {% if gig.permission != "display-only" %}data-full="/img/full/{{ gig.slug }}/{{ img.file }}"{% endif %}
        style="aspect-ratio: {{ img.width }} / {{ img.height }}">
-      <img src="/thumbs/{{ gig.slug }}/{{ img.file }}" alt="{{ gig.title }}"
+      <img src="{{ img.thumbSrc }}" srcset="{{ img.thumbSrcset }}"
+           sizes="(max-width: 700px) 100vw, (min-width: 1400px) 460px, 33vw"
+           alt="{{ gig.title }}"
            width="{{ img.thumbWidth }}" height="{{ img.thumbHeight }}" loading="lazy" decoding="async">
     </a>
     {% endfor %}

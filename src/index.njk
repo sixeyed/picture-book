@@ -7,7 +7,8 @@ permalink: /
   {% for gig in gigs %}
   <li>
     <a href="/{{ gig.slug }}/">
-      <img src="/thumbs/{{ gig.slug }}/{{ gig.cover }}" alt="{{ gig.title }}"
+      <img src="{{ gig.coverImage.thumbSrc }}" srcset="{{ gig.coverImage.thumbSrcset }}"
+           sizes="(max-width: 700px) 100vw, 340px" alt="{{ gig.title }}"
            width="{{ gig.coverImage.thumbWidth }}" height="{{ gig.coverImage.thumbHeight }}"
            loading="lazy" decoding="async">
       <h2>{{ gig.title }}</h2>

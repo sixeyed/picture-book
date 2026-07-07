@@ -107,10 +107,19 @@ serialise as `1.0`). Uses `ConvertTo-Json -Depth 6` (deeper nesting now).
 
 ## 6a. Layout refinements (2026-07-07, after first review)
 
-- **Thumbnails 600 → 1600 px long edge** (`build-images.mjs`, `_data/gigs.js` must
-  match). A portrait's *short* edge fills a column, so at 600 px it was ~340 px and
-  upscaled/fuzzy on hi-DPI. 1600 keeps portraits crisp at 2x. Incremental builds are
-  mtime-based and won't notice an edge change — delete `build/thumbs/` to force regen.
+- **Responsive thumbnails (`srcset`).** Two sizes are generated per image —
+  `THUMB_SIZES = [800, 1600]` — as `build/thumbs/<slug>/<stem>-<edge>.jpg` (via the
+  exported `thumbName(file, size)`). The data layer emits `thumbSrc` (the 800 url,
+  fallback) and `thumbSrcset` (both urls with each variant's *actual pixel width* as the
+  `w` descriptor); the template adds `sizes="(max-width:700px) 100vw,
+  (min-width:1400px) 460px, 33vw"`. Result: phones/1x fetch the ~44 KB 800; retina
+  desktops fetch the ~136 KB 1600 (a portrait's short edge fills a column, so it needs
+  the 1600 to stay crisp at 2x). `THUMB_SIZES` in `build-images.mjs` and `_data/gigs.js`
+  must match. Incremental builds are mtime-based and won't notice a size/scheme change
+  — delete `build/thumbs/` to force regen.
+- **`overflow: hidden` on `.thumb`** — a hard guard so an image can never spill its
+  frame (belt-and-suspenders; measurements never found a spill, but it removes the
+  possibility entirely).
 - **Visible border + wider gutter:** `.thumb img` gets `1px solid rgb(255 255 255 /
   .32)` (accent on hover); `--gap` raised to 16 px. Dark stage shots with only a faint
   border and a 10 px gap read as "overlapping" — there is no geometric overlap (flexbox

@@ -11,8 +11,8 @@ orchestrates the full local build: validate content → images → Eleventy.
 - Consumes: `loadGigs()` from `scripts/lib/gigs.mjs` (component 1); originals in
   `originals/<slug>/`.
 - Produces (contract §3.4 of the overview):
-  - `build/thumbs/<slug>/<file>` — 1600 px long edge, JPEG q80, metadata stripped
-    (bumped from 600 for hi-DPI sharpness in the column layout — see 09)
+  - `build/thumbs/<slug>/<stem>-800.jpg` and `<stem>-1600.jpg` — two sizes for a
+    responsive `srcset`, JPEG q80, metadata stripped (see 09 §6a)
   - `.r2-stage/web/<slug>/<file>` — 2048 px long edge, JPEG q85, metadata stripped
   - `.r2-stage/full/<slug>/<file>` — byte-for-byte copy, **only when**
     `gig.permission !== "display-only"`
@@ -62,10 +62,8 @@ import { dirname, join } from "node:path";
 import sharp from "sharp";
 import { loadGigs } from "./lib/gigs.mjs";
 
-const RENDITIONS = [
-  { name: "thumb", edge: 1600, quality: 80, dest: (g, f) => join("build", "thumbs", g, f) },
-  { name: "web",   edge: 2048, quality: 85, dest: (g, f) => join(".r2-stage", "web", g, f) },
-];
+const THUMB_SIZES = [800, 1600]; // two sizes -> <stem>-800.jpg, <stem>-1600.jpg (srcset)
+const WEB = { edge: 2048, quality: 85, dir: (slug) => join(".r2-stage", "web", slug) };
 
 async function isFresh(src, dest) {
   try { return (await stat(dest)).mtimeMs >= (await stat(src)).mtimeMs; }
@@ -134,7 +132,7 @@ so resize paths are exercised; and a 400×300 one for the no-upscale case).
 
 | Case | Expect |
 |---|---|
-| fresh build, editorial gig | thumb + web + full exist for each image; thumb long edge = 1600; web long edge = 2048 |
+| fresh build, editorial gig | both thumb sizes (`-800`,`-1600`) + web + full exist per image; thumb long edges = 800 and 1600; web long edge = 2048 |
 | display-only gig | no `.r2-stage/full/<slug>/` created |
 | 400×300 source | thumb output remains 400×300 (no upscale) |
 | EXIF orientation 6 source | output width/height are the rotated dimensions |

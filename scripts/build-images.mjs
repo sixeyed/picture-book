@@ -11,17 +11,25 @@ import { loadGigs } from "./lib/gigs.mjs";
 
 const CONCURRENCY = 4;
 
-// thumb/web share the same resize+reencode pipeline; full is a byte-for-byte copy.
-const RENDITIONS = [
-  // thumb long edge 1600: the gig grid displays shots up to ~560 px wide, and a
-  // portrait's *short* edge is what fills a column — at 600 px long edge that short
-  // edge was ~340 px, upscaled and fuzzy on hi-DPI. 1600 keeps them crisp at 2x.
-  { name: "thumb", edge: 1600, quality: 80, dir: (slug) => join("build", "thumbs", slug) },
-  { name: "web", edge: 2048, quality: 85, dir: (slug) => join(".r2-stage", "web", slug) },
-];
+// Grid thumbnails at two long edges for a responsive srcset: 800 covers small /
+// 1x displays, 1600 keeps portraits (whose short edge fills a column) crisp at 2x.
+// Files are named <stem>-<edge>.jpg; the template emits both in a srcset.
+const THUMB_SIZES = [800, 1600];
+const THUMB_QUALITY = 80;
+const thumbDir = (slug) => join("build", "thumbs", slug);
+
+// web (lightbox rendition, streamed from R2); full is a byte-for-byte copy.
+const WEB = { edge: 2048, quality: 85, dir: (slug) => join(".r2-stage", "web", slug) };
 
 function fullDir(slug) {
   return join(".r2-stage", "full", slug);
+}
+
+// P1000063.jpg + 800 -> P1000063-800.jpg  (sharp always writes JPEG)
+export function thumbName(file, size) {
+  const dot = file.lastIndexOf(".");
+  const stem = dot === -1 ? file : file.slice(0, dot);
+  return `${stem}-${size}.jpg`;
 }
 
 async function exists(path) {
@@ -56,11 +64,17 @@ async function generateRendition(src, dest, edge, quality) {
 async function processImage(gig, img, counts) {
   const src = join("originals", gig.slug, img.file);
 
-  for (const r of RENDITIONS) {
-    const dest = join(r.dir(gig.slug), img.file);
+  for (const size of THUMB_SIZES) {
+    const dest = join(thumbDir(gig.slug), thumbName(img.file, size));
     if (await isFresh(src, dest)) continue;
-    await generateRendition(src, dest, r.edge, r.quality);
-    counts[r.name]++;
+    await generateRendition(src, dest, size, THUMB_QUALITY);
+    counts.thumb++;
+  }
+
+  const webDest = join(WEB.dir(gig.slug), img.file);
+  if (!(await isFresh(src, webDest))) {
+    await generateRendition(src, webDest, WEB.edge, WEB.quality);
+    counts.web++;
   }
 
   if (gig.permission !== "display-only") {
@@ -92,16 +106,18 @@ async function runPool(items, worker, concurrency) {
 //   prune - see component 7)
 // - removes individual thumb/web(/full) files for images no longer listed
 async function cleanupStale(gig) {
-  const keep = new Set(gig.images.map((i) => i.file));
-  const dirs = [RENDITIONS[0].dir(gig.slug), RENDITIONS[1].dir(gig.slug)];
+  // thumbs keep every <stem>-<size>.jpg; web/full keep the plain <file>.
+  const thumbKeep = new Set(gig.images.flatMap((i) => THUMB_SIZES.map((s) => thumbName(i.file, s))));
+  const fileKeep = new Set(gig.images.map((i) => i.file));
+  const dirs = [[thumbDir(gig.slug), thumbKeep], [WEB.dir(gig.slug), fileKeep]];
 
   if (gig.permission === "display-only") {
     await rm(fullDir(gig.slug), { recursive: true, force: true });
   } else {
-    dirs.push(fullDir(gig.slug));
+    dirs.push([fullDir(gig.slug), fileKeep]);
   }
 
-  for (const dir of dirs) {
+  for (const [dir, keep] of dirs) {
     let entries;
     try {
       entries = await readdir(dir);
@@ -177,8 +193,9 @@ export async function run(argv = []) {
     return { exitCode: 1, message: `Image processing failed:\n  ${failures.join("\n  ")}`, counts };
   }
 
+  // per image: 2 thumbs + 1 web (+ 1 full unless display-only)
   const applicable = gigs.reduce(
-    (sum, g) => sum + g.images.length * (g.permission === "display-only" ? 2 : 3),
+    (sum, g) => sum + g.images.length * (g.permission === "display-only" ? 3 : 4),
     0
   );
   const generated = counts.thumb + counts.web + counts.full;
