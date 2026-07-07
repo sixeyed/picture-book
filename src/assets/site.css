@@ -116,10 +116,6 @@ header a:first-child {
   font-size: 0.85rem;
 }
 
-.meta p {
-  margin: 0.2em 0;
-}
-
 .meta .chip {
   display: inline-block;
   font-size: 0.72rem;

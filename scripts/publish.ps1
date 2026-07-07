@@ -17,7 +17,7 @@ try {
         if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) { throw "$tool is not installed" }
     }
     if (-not (rclone listremotes | Select-String -SimpleMatch 'r2:')) {
-        throw "rclone remote 'r2' is not configured - see docs/design/components/07-publish-pipeline.md"
+        throw "rclone remote 'r2' is not configured - see docs/DEPLOYMENT.md (Part A)"
     }
 
     if (-not $SkipBuild) { & (Join-Path $PSScriptRoot 'build.ps1') }
