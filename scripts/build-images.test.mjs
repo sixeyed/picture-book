@@ -106,7 +106,7 @@ test("fresh build, editorial gig: thumb + web + full exist for each image, corre
       assert.ok(srcBytes.equals(fullBytes), "full rendition should be byte-identical to the original");
 
       const thumbMeta = await sharp(thumbPath).metadata();
-      assert.equal(Math.max(thumbMeta.width, thumbMeta.height), 600, "thumb long edge should be 600");
+      assert.equal(Math.max(thumbMeta.width, thumbMeta.height), 1600, "thumb long edge should be 1600");
 
       const webMeta = await sharp(webPath).metadata();
       assert.equal(Math.max(webMeta.width, webMeta.height), 2048, "web long edge should be 2048");
@@ -158,7 +158,7 @@ test("EXIF orientation 6 source: output width/height are the rotated dimensions"
     // Raw pixels are 3000x2000 but orientation 6 rotates 90deg on display,
     // so the baked output should be portrait (narrower than it is tall).
     assert.ok(thumbMeta.height > thumbMeta.width, "rotated thumb should be portrait");
-    assert.equal(Math.max(thumbMeta.width, thumbMeta.height), 600);
+    assert.equal(Math.max(thumbMeta.width, thumbMeta.height), 1600);
   });
 });
 

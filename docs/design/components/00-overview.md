@@ -134,7 +134,7 @@ with `web/` or `full/`.
 
 | Rendition | Long edge | JPEG quality | Metadata | Output path |
 |---|---|---|---|---|
-| `thumb` | 600 px | 80 | stripped | `build/thumbs/<slug>/<file>` |
+| `thumb` | 1600 px | 80 | stripped | `build/thumbs/<slug>/<file>` |
 | `web` | 2048 px | 85 | stripped | `.r2-stage/web/<slug>/<file>` |
 | `full` | original bytes, untouched copy | — | as exported | `.r2-stage/full/<slug>/<file>` |
 

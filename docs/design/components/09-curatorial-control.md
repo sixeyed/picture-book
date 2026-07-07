@@ -105,6 +105,22 @@ serialise as `1.0`). Uses `ConvertTo-Json -Depth 6` (deeper nesting now).
   later if a gig needs it.
 - Cross-column spanning is not supported (flexbox columns are independent).
 
+## 6a. Layout refinements (2026-07-07, after first review)
+
+- **Thumbnails 600 → 1600 px long edge** (`build-images.mjs`, `_data/gigs.js` must
+  match). A portrait's *short* edge fills a column, so at 600 px it was ~340 px and
+  upscaled/fuzzy on hi-DPI. 1600 keeps portraits crisp at 2x. Incremental builds are
+  mtime-based and won't notice an edge change — delete `build/thumbs/` to force regen.
+- **Visible border + wider gutter:** `.thumb img` gets `1px solid rgb(255 255 255 /
+  .32)` (accent on hover); `--gap` raised to 16 px. Dark stage shots with only a faint
+  border and a 10 px gap read as "overlapping" — there is no geometric overlap (flexbox
+  columns cannot overlap siblings; verified by measuring bounding boxes).
+- **Balancing three stacked landscapes against the flanking portraits** is done with
+  column `widths`, not per-image sizing. For this gig `[1, 1.07, 1]` lands all three
+  columns within ~45 px of each other (portraits scaled slightly down so they no longer
+  tower over the centre stack). The balance point is gig-specific — a function of the
+  images' aspect ratios — so it's a hand-tuned `widths`, not an automatic rule.
+
 ## 7. Test coverage (all green: 79 node tests + 23 Pester)
 
 - `gigs.test.mjs`: venue/artist/links/layout/column validation; **authored-order**

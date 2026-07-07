@@ -5,7 +5,7 @@
   --text: #e8e6e3;
   --text-dim: #9b98a0;
   --accent: #b48eff;      /* stage-light purple; links, focus rings */
-  --gap: 10px;            /* grid gutter */
+  --gap: 16px;            /* gallery gutter */
   --content-max: 1400px;
   --radius: 4px;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -178,10 +178,12 @@ header a:first-child {
   height: auto;
   display: block;
   border-radius: var(--radius);
+  border: 1px solid rgb(255 255 255 / 0.32);
 }
 
 .thumb:hover img {
   opacity: 0.9;
+  border-color: var(--accent);
 }
 
 /* Lightbox */

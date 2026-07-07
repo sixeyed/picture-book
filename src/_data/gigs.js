@@ -1,6 +1,6 @@
 import { loadGigs, DEFAULT_COLUMNS } from "../../scripts/lib/gigs.mjs";
 
-const THUMB_EDGE = 600;
+const THUMB_EDGE = 1600; // must match the thumb rendition edge in build-images.mjs
 
 export default async function () {
   const gigs = await loadGigs("gigs");

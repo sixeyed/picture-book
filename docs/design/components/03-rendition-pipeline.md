@@ -11,7 +11,8 @@ orchestrates the full local build: validate content → images → Eleventy.
 - Consumes: `loadGigs()` from `scripts/lib/gigs.mjs` (component 1); originals in
   `originals/<slug>/`.
 - Produces (contract §3.4 of the overview):
-  - `build/thumbs/<slug>/<file>` — 600 px long edge, JPEG q80, metadata stripped
+  - `build/thumbs/<slug>/<file>` — 1600 px long edge, JPEG q80, metadata stripped
+    (bumped from 600 for hi-DPI sharpness in the column layout — see 09)
   - `.r2-stage/web/<slug>/<file>` — 2048 px long edge, JPEG q85, metadata stripped
   - `.r2-stage/full/<slug>/<file>` — byte-for-byte copy, **only when**
     `gig.permission !== "display-only"`
@@ -62,7 +63,7 @@ import sharp from "sharp";
 import { loadGigs } from "./lib/gigs.mjs";
 
 const RENDITIONS = [
-  { name: "thumb", edge: 600,  quality: 80, dest: (g, f) => join("build", "thumbs", g, f) },
+  { name: "thumb", edge: 1600, quality: 80, dest: (g, f) => join("build", "thumbs", g, f) },
   { name: "web",   edge: 2048, quality: 85, dest: (g, f) => join(".r2-stage", "web", g, f) },
 ];
 
@@ -133,7 +134,7 @@ so resize paths are exercised; and a 400×300 one for the no-upscale case).
 
 | Case | Expect |
 |---|---|
-| fresh build, editorial gig | thumb + web + full exist for each image; thumb long edge = 600; web long edge = 2048 |
+| fresh build, editorial gig | thumb + web + full exist for each image; thumb long edge = 1600; web long edge = 2048 |
 | display-only gig | no `.r2-stage/full/<slug>/` created |
 | 400×300 source | thumb output remains 400×300 (no upscale) |
 | EXIF orientation 6 source | output width/height are the rotated dimensions |

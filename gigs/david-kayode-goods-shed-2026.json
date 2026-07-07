@@ -23,7 +23,7 @@
   "permission": "display-only",
   "description": "",
   "cover": "P1000063.jpg",
-  "layout": { "columns": 3, "widths": [1, 1.4, 1] },
+  "layout": { "columns": 3, "widths": [1, 1.07, 1] },
   "images": [
     { "file": "P1000075.jpg", "width": 2435, "height": 4288, "column": 0 },
     { "file": "P1000063.jpg", "width": 4989, "height": 2770, "column": 1 },

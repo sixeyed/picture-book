@@ -13,7 +13,10 @@ const CONCURRENCY = 4;
 
 // thumb/web share the same resize+reencode pipeline; full is a byte-for-byte copy.
 const RENDITIONS = [
-  { name: "thumb", edge: 600, quality: 80, dir: (slug) => join("build", "thumbs", slug) },
+  // thumb long edge 1600: the gig grid displays shots up to ~560 px wide, and a
+  // portrait's *short* edge is what fills a column — at 600 px long edge that short
+  // edge was ~340 px, upscaled and fuzzy on hi-DPI. 1600 keeps them crisp at 2x.
+  { name: "thumb", edge: 1600, quality: 80, dir: (slug) => join("build", "thumbs", slug) },
   { name: "web", edge: 2048, quality: 85, dir: (slug) => join(".r2-stage", "web", slug) },
 ];
 
