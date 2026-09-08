@@ -117,3 +117,18 @@ implementation starts. Items marked **§11** resolve the spec's open decisions.
     `2026-06-01` — it is a runtime-semantics flag, not a dependency, so bumping it
     is a separate, deliberate decision to make at deploy time.
 
+19. **Pages project renamed `pictures` → `picture-book` (2026-09-08):** the original
+    name was never claimed, and in the interim someone else took
+    `pictures.pages.dev` — it now has a live DNS record and serves an unrelated
+    third-party page. Two consequences: `wrangler pages project create pictures`
+    would be rejected (the `*.pages.dev` label is globally unique), and the
+    documented CNAME target would have pointed `pictures.elton.stoneman.io` at a
+    stranger's site. Renamed in `wrangler.jsonc`, `publish.ps1` and five design
+    docs. **Unchanged:** the R2 bucket is still `pictures-elton` (bucket names are
+    per-account, no collision) and the custom domain is still
+    `pictures.elton.stoneman.io` — only the Pages project and its CNAME target moved.
+
+    Method worth reusing: `*.pages.dev` is **not** wildcard DNS, so
+    `dig +short <name>.pages.dev` returning nothing means the name is free.
+    Verified free at the time of choosing: `picture-book`, `elton-pictures`,
+    `stoneman-pictures`, `sixeyed-pictures`, `eltonstoneman`.

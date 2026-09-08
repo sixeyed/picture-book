@@ -179,7 +179,7 @@ export async function onRequest(context) {
 
 ```jsonc
 {
-  "name": "pictures",
+  "name": "picture-book",
   "pages_build_output_dir": "build",
   "r2_buckets": [
     { "binding": "PHOTOS", "bucket_name": "pictures-elton" }
@@ -205,7 +205,7 @@ $stage = Join-Path $root '.r2-stage'          # web/ + full/ produced by build.p
 rclone copy $stage 'r2:pictures-elton' --progress --transfers 8 --checksum
 
 # Deploy the static site + Function to Cloudflare Pages
-wrangler pages deploy $build --project-name pictures --commit-dirty=true
+wrangler pages deploy $build --project-name picture-book --commit-dirty=true
 
 Write-Host "Published -> https://pictures.elton.stoneman.io"
 ```

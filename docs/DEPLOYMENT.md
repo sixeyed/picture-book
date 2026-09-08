@@ -78,9 +78,9 @@ wrangler login               # opens a browser to authorise
 
 ### 6. Create the Pages project (direct-upload)
 ```bash
-wrangler pages project create pictures --production-branch main
+wrangler pages project create picture-book --production-branch main
 ```
-The project **name must be `pictures`** — that's what `wrangler.jsonc` and `publish.ps1`
+The project **name must be `picture-book`** — that's what `wrangler.jsonc` and `publish.ps1`
 reference. The `PHOTOS` → `pictures-elton` R2 binding is declared in `wrangler.jsonc` and
 applied on deploy.
 
@@ -90,18 +90,18 @@ From the repo root, build then publish (see Part B for the flags):
 docker compose run --rm build          # produces build/ and .r2-stage/
 ./scripts/publish.ps1 -SkipBuild       # pushes R2 + deploys the site
 ```
-The site is now live at `https://pictures.pages.dev`.
+The site is now live at `https://picture-book.pages.dev`.
 
 ### 8. Add the custom domain (order matters)
-1. Pages dashboard → project **pictures** → *Custom domains* → **Add**
+1. Pages dashboard → project **picture-book** → *Custom domains* → **Add**
    `pictures.elton.stoneman.io`. Do this **first**.
 2. At your DNS host for `stoneman.io`, add a **CNAME**:
-   `pictures.elton` → `pictures.pages.dev`.
+   `pictures.elton` → `picture-book.pages.dev`.
 3. Wait for the TLS certificate to issue (minutes). Then the site answers at
    `https://pictures.elton.stoneman.io`.
 
 ### 9. Confirm the R2 binding
-Pages dashboard → project **pictures** → *Settings* → *Bindings*: confirm
+Pages dashboard → project **picture-book** → *Settings* → *Bindings*: confirm
 `PHOTOS → pictures-elton` is present. If it isn't, add it manually (R2 bucket binding,
 variable name `PHOTOS`, bucket `pictures-elton`) and redeploy.
 
@@ -142,7 +142,7 @@ themselves stay out of git).
 3. **Push to R2** — `rclone copy .r2-stage r2:pictures-elton --checksum`. Only changed
    files upload; **it never deletes** remote objects (safe, but see the note below).
    Thumbnails are *not* pushed — they ride in the Pages bundle.
-4. **Deploy** — `wrangler pages deploy build --project-name pictures`.
+4. **Deploy** — `wrangler pages deploy build --project-name picture-book`.
 
 Flags:
 - **`-SkipBuild`** — deploy what's already in `build/` + `.r2-stage/` (use after a

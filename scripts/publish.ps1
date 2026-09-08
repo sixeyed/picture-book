@@ -32,7 +32,7 @@ try {
     if ($DryRun) {
         Write-Host 'Dry run - skipping deploy'
     } else {
-        wrangler pages deploy $build --project-name pictures --commit-dirty=true
+        wrangler pages deploy $build --project-name picture-book --commit-dirty=true
         if ($LASTEXITCODE -ne 0) { throw 'wrangler deploy failed' }
 
         Write-Host 'Published -> https://pictures.elton.stoneman.io'

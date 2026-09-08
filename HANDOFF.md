@@ -40,7 +40,12 @@ same change.
 Follow `docs/DEPLOYMENT.md` Part A. It is accurate and needs no changes. Steps 1–7
 are Cloudflare account setup and need the user's credentials.
 
-**DNS is resolved as of 2026-09-04 — do not re-research this:**
+**Pages project name changed 2026-09-08 — see ASSUMPTIONS #19.** The old name
+`pictures` was taken by a third party in the interim; the project is now
+**`picture-book`** and the CNAME target is `picture-book.pages.dev`. Re-check with
+`dig +short <name>.pages.dev` before trusting any pages.dev name — no record means free.
+
+**DNS is resolved as of 2026-09-04, re-verified 2026-09-08 — do not re-research this:**
 
 - `stoneman.io` is registered and DNS-hosted at **name.com** (NS: `ns{1..4}*.name.com`).
   It is **not** a Cloudflare zone, and it does not need to be.
@@ -48,7 +53,7 @@ are Cloudflare account setup and need the user's credentials.
   are deploying to a subdomain, it is not necessary for your site to be a Cloudflare
   zone." Only *apex* domains require a Cloudflare zone. `pictures.elton.stoneman.io`
   is a subdomain, so a plain CNAME at name.com is sufficient.
-- At name.com, add: **CNAME**, host `pictures.elton`, answer `pictures.pages.dev`.
+- At name.com, add: **CNAME**, host `pictures.elton`, answer `picture-book.pages.dev`.
 - **Order matters:** add the custom domain in the Pages dashboard *first*, then create
   the CNAME. (DEPLOYMENT.md step 8 says this.)
 - `dig CAA stoneman.io` returns **empty** — no CAA records, so nothing blocks

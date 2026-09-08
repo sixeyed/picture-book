@@ -20,7 +20,7 @@ objects under the site's own domain, with hard edge caching.
 
 ```jsonc
 {
-  "name": "pictures",
+  "name": "picture-book",
   "compatibility_date": "2026-06-01",
   "pages_build_output_dir": "build",
   "r2_buckets": [
