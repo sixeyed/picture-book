@@ -30,9 +30,11 @@ brew install rclone          # syncs renditions to R2
 npm install -g wrangler      # deploys to Pages   (or use `npx wrangler ...`)
 ```
 
-`node` and `pwsh` you already have. (Heads-up: your host `node` is a stale v18 that
-shadows Homebrew's Node 24 — see Troubleshooting. It doesn't matter if you build in
-Docker as recommended below.)
+`node` and `pwsh` you already have. (Heads-up: there is still a stale Node **v18** at
+`/usr/local/bin/node`. As of 2026-09-04 Homebrew's Node **26** wins on your PATH, so
+plain `node` is fine — but if `/usr/local/bin` ever moves ahead of `/opt/homebrew/bin`
+you get v18 and `sharp` fails. See Troubleshooting. It doesn't matter at all if you
+build in Docker as recommended below.)
 
 ---
 
@@ -144,8 +146,8 @@ themselves stay out of git).
 
 Flags:
 - **`-SkipBuild`** — deploy what's already in `build/` + `.r2-stage/` (use after a
-  `docker compose run --rm build`). **Recommended**, so the build uses Docker's Node 24
-  rather than your host's stale v18.
+  `docker compose run --rm build`). **Recommended**, so the build uses Docker's pinned
+  Node 26 rather than whichever `node` your host PATH happens to resolve.
 - **`-DryRun`** — show what rclone *would* upload and skip the deploy entirely.
 
 > Run `publish.ps1` from the repo root. It pins itself to the repo with
@@ -183,7 +185,7 @@ Flags:
 |---|---|
 | `rclone remote 'r2' is not configured` | Part A step 4; remote must be named exactly `r2`. |
 | Images 404 in production but site loads | R2 binding missing — Part A step 9; redeploy. |
-| `sharp`/Eleventy errors during a **host** build | Host `node` is v18. Build in Docker (`docker compose run --rm build`) and publish with `-SkipBuild`, or fix your PATH so Homebrew's Node 24 wins (`/opt/homebrew/bin` before `/usr/local/bin`). |
+| `sharp`/Eleventy errors during a **host** build | Your `node` resolved to the stale v18 at `/usr/local/bin`. Check with `node -v` (want ≥ 20.9). Build in Docker (`docker compose run --rm build`) and publish with `-SkipBuild`, or fix your PATH so Homebrew's Node wins (`/opt/homebrew/bin` before `/usr/local/bin`). |
 | Custom domain won't resolve | Add the domain in the Pages dashboard **before** the DNS CNAME; wait for the cert. |
 | Thumbnails stale after a rebuild locally | `wrangler pages dev` caches its asset manifest — restart the `web` container. (Production is unaffected.) |
 

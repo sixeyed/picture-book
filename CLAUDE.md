@@ -2,6 +2,9 @@
 
 Guidance for Claude Code working in this repo. Read this before making changes.
 
+**Start here: [HANDOFF.md](HANDOFF.md)** — current state, open items and settled
+decisions. The build is complete; the site is not yet deployed.
+
 ## What this is
 
 A self-hosted gig-photography gallery: a static Eleventy site on Cloudflare Pages,
@@ -18,14 +21,17 @@ throughout. `docs/design/ASSUMPTIONS.md` records decisions and reversals.
 
 ## Build, test, preview — use Docker
 
-The host `node` is a stale **v18** that shadows Homebrew's Node 24. Two options:
+A stale Node **v18** still sits at `/usr/local/bin/node`. As of 2026-09-04 Homebrew's
+Node **26** is ahead of it on PATH, so plain `node` is fine — but verify with `node -v`
+(want ≥ 20.9) before trusting a host-side run. Two options:
 - **Preferred:** run everything in Docker — `docker compose run --rm build|test`,
-  `docker compose up web` (full stack incl. the image Function on :8788).
-- **Host-side:** prefix with `export PATH=/opt/homebrew/bin:$PATH` to get Node 24.
+  `docker compose up web` (full stack incl. the image Function on :8788). Pinned Node 26.
+- **Host-side:** prefix with `export PATH=/opt/homebrew/bin:$PATH` to force Homebrew's Node.
 
 Tests:
-- Node: **`node --test`** from the repo root (bare form). Do **not** pass `scripts/` as a
-  directory arg — Node 24.2.0 fails that with `ERR_MODULE_NOT_FOUND`.
+- Node: **`node --test`** from the repo root (bare form) — this is what `test.ps1` runs.
+  (The old `ERR_MODULE_NOT_FOUND` on `node --test scripts/` was a Node 24.2.0 bug; it no
+  longer reproduces on Node 26.8.1, but the bare form stays the supported invocation.)
 - pwsh: `pwsh -NoProfile -Command "Invoke-Pester scripts/new-gig.tests.ps1 -CI"`.
 - Current baseline: **79 node tests + 23 Pester**, all green.
 

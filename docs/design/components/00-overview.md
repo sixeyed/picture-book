@@ -83,9 +83,9 @@ and every doc that references the contract.
 
 ### 3.1 Toolchain
 
-- Node **≥ 20** (LTS), ESM everywhere (`.mjs` / `"type": "module"`).
+- Node **≥ 20.9** (`sharp@^0.35` floor; built and tested on 26), ESM everywhere (`.mjs` / `"type": "module"`).
 - PowerShell 7 (`pwsh`) for CLI entry points — the user's shell on macOS.
-- npm dependencies: `@11ty/eleventy@^3`, `sharp@^0.33`. Dev-only: none required.
+- npm dependencies: `@11ty/eleventy@^3.1`, `sharp@^0.35`. Dev-only: none required.
 - External CLIs (publish only): `rclone` (remote named `r2`), `wrangler` (logged in).
 
 `package.json` (owned by component 4, consumed by all):
@@ -95,15 +95,15 @@ and every doc that references the contract.
   "name": "picture-book",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": { "node": ">=20.9" },
   "scripts": {
     "build:site": "eleventy",
     "build:images": "node scripts/build-images.mjs",
     "dev": "wrangler pages dev build"
   },
   "dependencies": {
-    "@11ty/eleventy": "^3.0.0",
-    "sharp": "^0.33.0"
+    "@11ty/eleventy": "^3.1.6",
+    "sharp": "^0.35.4"
   }
 }
 ```

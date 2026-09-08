@@ -24,7 +24,7 @@ removes any sensitivity to host toolchain versions.
 ## 1. Principle
 
 The containers run **the same pwsh entry-point scripts as the host** — Docker is an
-environment, not a second build system. The image therefore contains Node 24, pwsh,
+environment, not a second build system. The image therefore contains Node 26, pwsh,
 and Pester; the repo is bind-mounted so iteration doesn't require image rebuilds.
 
 Publishing (`publish.ps1`) stays host-side: it needs `wrangler login` and rclone
@@ -34,11 +34,11 @@ mounting credential config, but that is not a supported path in this design.)
 ## 2. `Dockerfile`
 
 ```dockerfile
-FROM node:24-bookworm-slim
+FROM node:26-bookworm-slim
 
 # pwsh: tar.gz install (the Microsoft apt repo is amd64-only; this works on arm64 Macs too)
 ARG TARGETARCH
-ARG PWSH_VERSION=7.5.4
+ARG PWSH_VERSION=7.6.5
 RUN apt-get update \
  && apt-get install -y --no-install-recommends curl ca-certificates libicu72 \
  && arch=$([ "$TARGETARCH" = "arm64" ] && echo linux-arm64 || echo linux-x64) \

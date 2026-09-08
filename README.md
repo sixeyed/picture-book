@@ -54,7 +54,7 @@ docker compose up web                                      # http://localhost:87
 ## Publish
 
 ```bash
-docker compose run --rm build          # build renditions + site in Docker (uses Node 24)
+docker compose run --rm build          # build renditions + site in Docker (uses Node 26)
 ./scripts/publish.ps1 -SkipBuild       # push renditions to R2 + deploy the site
 ```
 

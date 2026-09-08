@@ -91,7 +91,7 @@ implementation starts. Items marked **§11** resolve the spec's open decisions.
     change — accepted for zero deps).
 
 16. **Docker local stack (user requirement, 2026-07-05):** the containers run the
-    same pwsh entry-point scripts as the host (image = Node 24 + pwsh + Pester;
+    same pwsh entry-point scripts as the host (image = Node 26 + pwsh + Pester;
     repo bind-mounted; `node_modules` and wrangler local-R2 state in named
     volumes). `wrangler pages dev` inside the container serves the full stack —
     static site + image Function + simulated R2 — on `localhost:8788`. Publishing
@@ -101,3 +101,19 @@ implementation starts. Items marked **§11** resolve the spec's open decisions.
 17. **Site copy placeholders:** `src/_data/site.js` carries the site name, intro
     line, contact email (`elton@sixeyed.com` assumed) and an Instagram URL marked
     TODO. All user-facing wording needs your pass.
+
+18. **Dependency refresh (2026-09-04):** after ~2 months dormant, everything was
+    moved to current: `sharp@^0.33.0` → `^0.35.4`, `@11ty/eleventy@^3.0.0` →
+    `^3.1.6` (3.1.6 *is* latest stable — 4.0 is alpha only), Docker base
+    `node:24-bookworm-slim` → `node:26-bookworm-slim`, `PWSH_VERSION` 7.5.4 →
+    7.6.5 (which pulls Pester 6.x instead of 5.x). `engines.node` raised to
+    `>=20.9` to match sharp 0.35's floor. Baseline was green *before* the update
+    and green after: 79 node + 23 Pester. Thumbnails were regenerated from
+    scratch (`rm -rf build/thumbs`) and verified — correct long edges, EXIF still
+    stripped, page renders with no overlap at 2560px.
+
+    Deliberately **not** changed: `wrangler` stays un-pinned via `npx` (assumption
+    in the deferred pile), and `wrangler.jsonc` `compatibility_date` stays at
+    `2026-06-01` — it is a runtime-semantics flag, not a dependency, so bumping it
+    is a separate, deliberate decision to make at deploy time.
+

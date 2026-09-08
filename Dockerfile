@@ -1,8 +1,8 @@
-FROM node:24-bookworm-slim
+FROM node:26-bookworm-slim
 
 # pwsh: tar.gz install (the Microsoft apt repo is amd64-only; this works on arm64 Macs too)
 ARG TARGETARCH
-ARG PWSH_VERSION=7.5.4
+ARG PWSH_VERSION=7.6.5
 RUN apt-get update \
  && apt-get install -y --no-install-recommends curl ca-certificates libicu72 \
  && arch=$([ "$TARGETARCH" = "arm64" ] && echo linux-arm64 || echo linux-x64) \
