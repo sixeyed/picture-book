@@ -177,9 +177,27 @@ These are in `CLAUDE.md` but are worth repeating because each one cost real time
 
 ## Risks worth raising with the user
 
-- **No git remote is configured.** `git remote -v` is empty, so the only copy of this
-  work is on the local disk. `originals/` is gitignored and unbacked-up by design, but
-  the code has no off-machine copy either.
+- ~~No git remote is configured.~~ **Resolved 2026-09-09** — `origin` is
+  https://github.com/sixeyed/picture-book (public). History was scanned before
+  publishing: no real account ID (only the `<ACCOUNT_ID>` placeholder), no credential
+  files, no internal hostnames or IPs.
+
+- **`originals/` still has NO off-machine copy, and GitHub does not change that.**
+  This is the real remaining risk. Git carries `gigs/*.json` (the recipe) but
+  `build-images.mjs` resolves every image as `originals/<slug>/<file>`, so a fresh
+  clone **cannot republish a gig** — it has the metadata and no pixels.
+
+  Note the asymmetry the `permission` field creates, which is easy to miss:
+  `editorial`/`commercial` gigs upload `full/` originals to R2, so those *do* get an
+  off-site copy as a side effect of publishing. **`display-only` gigs upload only the
+  2048px `web` rendition** — their originals exist solely on this Mac. The one
+  published gig is `display-only`, so its 28MB of originals are single-copy.
+
+  If backing them up into the existing R2 bucket, use a **prefix other than
+  `web/`/`full/`** (e.g. `archive/`). Those two are the Function's
+  `ALLOWED_PREFIXES`, so anything under them is publicly fetchable — putting a
+  display-only gig's originals under `full/` would silently defeat the permission
+  model.
 - ~~Two months of dependency drift.~~ **Resolved 2026-09-04** — see ASSUMPTIONS #18.
   Baseline was verified green *before* touching anything, then everything moved to
   current: `sharp@^0.35.4`, `@11ty/eleventy@^3.1.6`, Docker base `node:26`, pwsh 7.6.5
