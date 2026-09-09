@@ -135,5 +135,5 @@ cache header, and a second browser load is served from cache (network tab: disk 
 
 - [ ] `node --test scripts/img-function.test.mjs` passes.
 - [ ] Local smoke test above passes.
-- [ ] After first deploy: `curl -I https://pictures.elton.stoneman.io/img/web/<slug>/<file>`
+- [ ] After first deploy: `curl -I https://pictures.sixeyed.com/img/web/<slug>/<file>`
       → 200 with `cf-cache-status` header present (HIT on the second request).

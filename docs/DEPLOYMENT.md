@@ -2,7 +2,7 @@
 
 Everything up to now runs **locally** (build + preview in Docker). This guide covers
 the one-time Cloudflare setup and the repeatable publish workflow that puts the site
-live at **`pictures.elton.stoneman.io`**.
+live at **`pictures.sixeyed.com`**.
 
 ## How it deploys (the model)
 
@@ -97,11 +97,11 @@ The site is now live at `https://picture-book.pages.dev`.
 
 ### 8. Add the custom domain (order matters)
 1. Pages dashboard → project **picture-book** → *Custom domains* → **Add**
-   `pictures.elton.stoneman.io`. Do this **first**.
-2. At your DNS host for `stoneman.io`, add a **CNAME**:
-   `pictures.elton` → `picture-book.pages.dev`.
+   `pictures.sixeyed.com`. Do this **first**.
+2. At your DNS host for `sixeyed.com`, add a **CNAME**:
+   `pictures` → `picture-book.pages.dev`.
 3. Wait for the TLS certificate to issue (minutes). Then the site answers at
-   `https://pictures.elton.stoneman.io`.
+   `https://pictures.sixeyed.com`.
 
 ### 9. Confirm the R2 binding
 Pages dashboard → project **picture-book** → *Settings* → *Bindings*: confirm
@@ -129,7 +129,7 @@ docker compose up web                                     # http://localhost:878
 
 # 4. Publish
 docker compose run --rm build          # if you didn't already build in step 3
-./scripts/publish.ps1 -SkipBuild       # → live at pictures.elton.stoneman.io
+./scripts/publish.ps1 -SkipBuild       # → live at pictures.sixeyed.com
 ```
 
 Commit `gigs/<slug>.json` to git when you're happy (code + content history; the images
@@ -160,7 +160,7 @@ Flags:
 
 ## Verify & costs
 
-- `curl -I https://pictures.elton.stoneman.io/img/web/<slug>/<file>` → `200` with
+- `curl -I https://pictures.sixeyed.com/img/web/<slug>/<file>` → `200` with
   `cache-control: public, max-age=31536000, immutable`; a second request shows
   `cf-cache-status: HIT`.
 - A display-only gig's `/img/full/...` returns **404** (originals aren't uploaded for

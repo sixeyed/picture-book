@@ -8,7 +8,7 @@ No third-party portfolio host, no ads, own domain, publish-by-script.
 
 ## 1. Goal
 
-- Public gallery at **`pictures.elton.stoneman.io`**, carrying your name/brand.
+- Public gallery at **`pictures.sixeyed.com`**, carrying your name/brand.
 - Full-resolution images available to viewers, but **served through the site**, not
   from a public storage URL.
 - Everything publishable from the command line after each gig — no dashboard clicking.
@@ -21,7 +21,7 @@ No third-party portfolio host, no ads, own domain, publish-by-script.
 | Layer | Choice | Notes |
 |---|---|---|
 | Site host | **Cloudflare Pages** | Free, unlimited bandwidth, git or `wrangler` deploy |
-| Site domain | `pictures.elton.stoneman.io` | External **CNAME** → `<project>.pages.dev` (add in Pages dashboard *first*) |
+| Site domain | `pictures.sixeyed.com` | External **CNAME** → `<project>.pages.dev` (add in Pages dashboard *first*) |
 | Image storage | **Cloudflare R2** (private bucket) | No public access, no custom domain, no r2.dev |
 | Image delivery | **Pages Function + R2 binding** | Streams objects under the site's own domain |
 | Source control | Git repo | Code + gig metadata + small thumbnails only |
@@ -207,7 +207,7 @@ rclone copy $stage 'r2:pictures-elton' --progress --transfers 8 --checksum
 # Deploy the static site + Function to Cloudflare Pages
 wrangler pages deploy $build --project-name picture-book --commit-dirty=true
 
-Write-Host "Published -> https://pictures.elton.stoneman.io"
+Write-Host "Published -> https://pictures.sixeyed.com"
 ```
 
 **j. `.gitignore`** — `originals/`, `build/`, `.r2-stage/`, `node_modules/`.
@@ -250,7 +250,7 @@ originals/<slug>/         ──(new-gig.ps1)──►  gigs/<slug>.json stub
    11ty render     rclone ──────────────►  R2 (private)
         │
         ▼
- wrangler pages deploy build/  ──►  pictures.elton.stoneman.io
+ wrangler pages deploy build/  ──►  pictures.sixeyed.com
 ```
 
 Run `./scripts/publish.ps1` after each gig. Done.

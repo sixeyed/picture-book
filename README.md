@@ -2,7 +2,7 @@
 
 A self-hosted, non-destructive photo gallery for live-music shots. Full-resolution
 originals live in private Cloudflare R2; a lightweight static site (Cloudflare Pages)
-presents them under your own domain — **pictures.elton.stoneman.io**. No third-party
+presents them under your own domain — **pictures.sixeyed.com**. No third-party
 portfolio host, no ads, publish-by-script. Runs at £0/month at personal scale.
 
 Everything builds, previews, and tests in Docker — no host toolchain needed.
@@ -58,7 +58,7 @@ docker compose run --rm build          # build renditions + site in Docker (uses
 ./scripts/publish.ps1 -SkipBuild       # push renditions to R2 + deploy the site
 ```
 
-That's it — the gig is live at `https://pictures.elton.stoneman.io`. Commit
+That's it — the gig is live at `https://pictures.sixeyed.com`. Commit
 `gigs/<slug>.json` to git when you're happy with it.
 
 `publish.ps1` pushes the `web`/`full` renditions to R2 (only changed files) and deploys

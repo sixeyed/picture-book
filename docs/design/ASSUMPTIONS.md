@@ -132,3 +132,17 @@ implementation starts. Items marked **§11** resolve the spec's open decisions.
     `dig +short <name>.pages.dev` returning nothing means the name is free.
     Verified free at the time of choosing: `picture-book`, `elton-pictures`,
     `stoneman-pictures`, `sixeyed-pictures`, `eltonstoneman`.
+
+20. **Custom domain changed to `pictures.sixeyed.com` (2026-09-09):** supersedes the
+    `pictures.elton.stoneman.io` references in #19 above, which are left as written
+    because they record what was true at the time of the project rename.
+
+    Nothing about the approach changes: `sixeyed.com` is on the **same name.com
+    nameservers** as `stoneman.io` (`ns{1..4}*.name.com`), so it is still external
+    DNS, still a subdomain, still a plain CNAME, and still needs no Cloudflare zone.
+    Re-verified 2026-09-09: no CAA records on `sixeyed.com` or `pictures.sixeyed.com`
+    (nothing blocks cert issuance), and `pictures.sixeyed.com` does not resolve.
+
+    The CNAME **host label is now `pictures`**, not `pictures.elton` — the record goes
+    in the `sixeyed.com` zone. The apex `sixeyed.com` serves something else
+    (`23.99.193.44`) and is untouched.

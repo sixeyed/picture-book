@@ -83,7 +83,7 @@ this is acceptable).
 ```javascript
 export default {
   name: "Elton Stoneman — Gig Photography",
-  url: "https://pictures.elton.stoneman.io",
+  url: "https://pictures.sixeyed.com",
   intro: "Live-music photography. Shot from the crowd and the pit.",
   email: "elton@sixeyed.com",
   instagram: "https://instagram.com/TODO",

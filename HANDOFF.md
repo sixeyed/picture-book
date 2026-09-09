@@ -48,11 +48,11 @@ verified live. `rclone` v1.75.1 and `wrangler` 4.130.0 are installed on the host
 
 **Step 8 — custom domain — is the only one left, and it is yours:**
 1. Pages dashboard → project `picture-book` → *Custom domains* → Add
-   `pictures.elton.stoneman.io`. **Do this first.**
-2. At name.com: CNAME, host `pictures.elton`, answer `picture-book.pages.dev`.
+   `pictures.sixeyed.com`. **Do this first.**
+2. At name.com: CNAME, host `pictures`, answer `picture-book.pages.dev`.
 3. Wait for the cert.
 
-Until then `site.url` (`https://pictures.elton.stoneman.io`) is what canonical/OG
+Until then `site.url` (`https://pictures.sixeyed.com`) is what canonical/OG
 tags point at, so those references are live-but-unresolvable. Fixed by step 8.
 
 **Pages project name changed 2026-09-08 — see ASSUMPTIONS #19.** The old name
@@ -62,19 +62,19 @@ tags point at, so those references are live-but-unresolvable. Fixed by step 8.
 
 **DNS is resolved as of 2026-09-04, re-verified 2026-09-08 — do not re-research this:**
 
-- `stoneman.io` is registered and DNS-hosted at **name.com** (NS: `ns{1..4}*.name.com`).
+- `sixeyed.com` is registered and DNS-hosted at **name.com** (NS: `ns{1..4}*.name.com`).
   It is **not** a Cloudflare zone, and it does not need to be.
 - Cloudflare Pages supports custom domains on **external DNS for subdomains**: "If you
   are deploying to a subdomain, it is not necessary for your site to be a Cloudflare
-  zone." Only *apex* domains require a Cloudflare zone. `pictures.elton.stoneman.io`
+  zone." Only *apex* domains require a Cloudflare zone. `pictures.sixeyed.com`
   is a subdomain, so a plain CNAME at name.com is sufficient.
-- At name.com, add: **CNAME**, host `pictures.elton`, answer `picture-book.pages.dev`.
+- At name.com, add: **CNAME**, host `pictures`, answer `picture-book.pages.dev`.
 - **Order matters:** add the custom domain in the Pages dashboard *first*, then create
   the CNAME. (DEPLOYMENT.md step 8 says this.)
-- `dig CAA stoneman.io` returns **empty** — no CAA records, so nothing blocks
+- `dig CAA sixeyed.com` returns **empty** — no CAA records, so nothing blocks
   Cloudflare from issuing the certificate. This is the usual failure mode for
   external-DNS custom domains and it does not apply here.
-- `pictures.elton.stoneman.io` currently does not resolve — the name is free.
+- `pictures.sixeyed.com` currently does not resolve — the name is free.
 
 ### 2. Placeholder copy — MUST be fixed before first publish
 
@@ -133,7 +133,7 @@ Docker base-image tag pinning. These were consciously accepted, not overlooked.
 - **Pages is not deprecated** — Cloudflare is absorbing Pages features into Workers,
   with no forced migration deadline announced.
 - **Pages is actively the better fit here**, because it supports custom domains outside
-  Cloudflare zones and `stoneman.io` is on name.com. Migrating would *cost* flexibility.
+  Cloudflare zones and `sixeyed.com` is on name.com. Migrating would *cost* flexibility.
 
 Revisit only if the user hits a Workers-only feature they want (observability/Workers
 Logs is the only plausible one) or Cloudflare announces a deadline.

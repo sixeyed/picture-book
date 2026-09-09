@@ -35,7 +35,7 @@ try {
         wrangler pages deploy $build --project-name picture-book --commit-dirty=true
         if ($LASTEXITCODE -ne 0) { throw 'wrangler deploy failed' }
 
-        Write-Host 'Published -> https://pictures.elton.stoneman.io'
+        Write-Host 'Published -> https://pictures.sixeyed.com'
     }
 }
 finally { Pop-Location }

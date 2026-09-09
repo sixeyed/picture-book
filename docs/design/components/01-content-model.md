@@ -50,7 +50,7 @@ validation, not silently disappear.
 ```json
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
-  "$id": "https://pictures.elton.stoneman.io/schema/gig.schema.json",
+  "$id": "https://pictures.sixeyed.com/schema/gig.schema.json",
   "title": "Gig",
   "type": "object",
   "required": ["slug", "title", "date", "venue", "location", "artists", "permission", "cover", "images"],

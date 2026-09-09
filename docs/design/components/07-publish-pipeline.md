@@ -11,7 +11,7 @@ the site. Plus the repo hygiene file and the one-time Phase 0 checklist.
 - Consumes: `build.ps1` (component 3); `.r2-stage/{web,full}/` layout; `build/`
   output; `wrangler.jsonc` project name `picture-book` (component 6).
 - Produces: objects in R2 bucket `pictures-elton` under `web/` and `full/`; a live
-  deployment at `pictures.elton.stoneman.io`.
+  deployment at `pictures.sixeyed.com`.
 
 ---
 
@@ -55,7 +55,7 @@ try {
         wrangler pages deploy $build --project-name picture-book --commit-dirty=true
         if ($LASTEXITCODE -ne 0) { throw 'wrangler deploy failed' }
 
-        Write-Host 'Published -> https://pictures.elton.stoneman.io'
+        Write-Host 'Published -> https://pictures.sixeyed.com'
     }
 }
 finally { Pop-Location }
@@ -112,8 +112,8 @@ Note: the repo is not yet a git repository — `git init` is part of Phase 0 bel
 5. **Pages project:** `wrangler pages project create picture-book` (production branch:
    `main`). First deploy: `wrangler pages deploy build --project-name picture-book`.
 6. **Custom domain:** Pages dashboard → project → Custom domains → add
-   `pictures.elton.stoneman.io` **first**, then at the DNS host for
-   `stoneman.io` add `CNAME pictures.elton → picture-book.pages.dev`. Wait for the
+   `pictures.sixeyed.com` **first**, then at the DNS host for
+   `sixeyed.com` add `CNAME pictures → picture-book.pages.dev`. Wait for the
    cert to issue.
 7. **Binding check:** `wrangler.jsonc` carries the R2 binding for Pages; confirm in
    dashboard → project → Settings → Bindings that `PHOTOS → pictures-elton` shows
@@ -142,7 +142,7 @@ The script's value is glue, not logic — verification is a staged end-to-end ru
 | dry run | `./scripts/publish.ps1 -DryRun` → rclone lists pending uploads, no deploy happens |
 | first publish | full run → site live on `picture-book.pages.dev`; gig page lightbox loads `web` images through `/img/...` |
 | idempotence | immediate second run → rclone transfers 0 files |
-| custom domain | after DNS: site + images load on `pictures.elton.stoneman.io`; `curl -I` on an image shows `cf-cache-status: HIT` on second request |
+| custom domain | after DNS: site + images load on `pictures.sixeyed.com`; `curl -I` on an image shows `cf-cache-status: HIT` on second request |
 | download gating | editorial gig: full-res link downloads; display-only gig: `curl -I /img/full/<slug>/<file>` → 404 |
 
 ## 6. Acceptance criteria
