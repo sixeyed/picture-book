@@ -7,13 +7,17 @@ dormant ~2 months. Read `CLAUDE.md` first (build commands + gotchas), then this.
 
 ## TL;DR
 
-**The software is finished. Nothing is live.** All nine components are implemented,
-reviewed and committed; 79 node tests + 23 Pester green as of the last run. One real
-gig is authored and browser-verified. The site has only ever existed on
-`localhost:8788`.
+**The site is LIVE** at `https://picture-book.pages.dev` (first deploy 2026-09-09).
+All nine components are implemented and committed; 79 node tests + 23 Pester green.
+One real gig is published. R2 holds the 5 `web` renditions (1.23 MiB).
 
-The next meaningful step is **Phase 0 deployment** (`docs/DEPLOYMENT.md` Part A), not
-more code.
+Verified in production: pages, thumbnails, and `/img/web/...` streaming from R2
+through the Function (the `PHOTOS` binding applied automatically from
+`wrangler.jsonc` — Part A step 9 needs no manual action). `/img/full/...` correctly
+404s for the `display-only` gig.
+
+**The only Phase 0 step left is the custom domain (step 8)** — it is dashboard +
+DNS work, so it needs you; there is no `wrangler pages domain` subcommand.
 
 ---
 
@@ -37,8 +41,19 @@ same change.
 
 ### 1. Phase 0 — go live (blocked on the user, not on code)
 
-Follow `docs/DEPLOYMENT.md` Part A. It is accurate and needs no changes. Steps 1–7
-are Cloudflare account setup and need the user's credentials.
+**Steps 1–7 and 9 are DONE (2026-09-09).** Account, R2 bucket `pictures-elton`
+(Western Europe, private), bucket-scoped R2 token + rclone remote `r2`,
+`wrangler login`, Pages project `picture-book`, first deploy — all complete and
+verified live. `rclone` v1.75.1 and `wrangler` 4.130.0 are installed on the host.
+
+**Step 8 — custom domain — is the only one left, and it is yours:**
+1. Pages dashboard → project `picture-book` → *Custom domains* → Add
+   `pictures.elton.stoneman.io`. **Do this first.**
+2. At name.com: CNAME, host `pictures.elton`, answer `picture-book.pages.dev`.
+3. Wait for the cert.
+
+Until then `site.url` (`https://pictures.elton.stoneman.io`) is what canonical/OG
+tags point at, so those references are live-but-unresolvable. Fixed by step 8.
 
 **Pages project name changed 2026-09-08 — see ASSUMPTIONS #19.** The old name
 `pictures` was taken by a third party in the interim; the project is now
@@ -63,14 +78,19 @@ are Cloudflare account setup and need the user's credentials.
 
 ### 2. Placeholder copy — MUST be fixed before first publish
 
-Both still outstanding (verified 2026-09-04):
+**Resolved 2026-09-09, to the user's own direction — deployed.**
 
-- `src/_data/site.js:6` — `instagram: "https://instagram.com/TODO"` is a dead link.
-- `src/_data/site.js` `name` / `intro`, and `src/about.njk` body copy — all
-  agent-written placeholders. ASSUMPTIONS #17 flags that all user-facing wording needs
-  the user's own pass.
+- `instagram` is now `https://www.instagram.com/elton.stoneman/`. No TODOs remain
+  anywhere in `src/`.
+- `intro` trimmed to `"Live-music photography."` (the "shot from the crowd and the
+  pit" line was cut on request). Shows on the home page and About.
+- About page reduced to the intro line plus the Instagram link. The email line was
+  removed on request, so `site.email` is now **unused config** — the field is still
+  in `site.js`, deliberately not deleted.
+- `site.name` was left as-is.
 
-Do **not** invent replacement copy. Ask the user for it.
+Still never given the user's pass: nothing outstanding that is *known* placeholder,
+but the wording is minimal by choice rather than reviewed prose.
 
 ### 3. Unresolved: thumbnail overlap report
 

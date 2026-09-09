@@ -66,10 +66,13 @@ Answer: `n` (new remote) → name **`r2`** → storage **`s3`** → provider **`
 → paste the Access Key ID + Secret → region `auto` → endpoint
 `https://<ACCOUNT_ID>.r2.cloudflarestorage.com` → accept defaults for the rest.
 
-Verify:
+Verify — list *inside* the bucket, not the account:
 ```bash
-rclone lsd r2:                # should list: pictures-elton
+rclone lsd r2:pictures-elton   # exits 0; empty output on a fresh bucket
 ```
+Do **not** verify with `rclone lsd r2:`. A token scoped to a single bucket (as above)
+has no `ListBuckets` permission, so that command returns `403 AccessDenied` even when
+the config is perfectly correct. Confirmed 2026-09-09.
 
 ### 5. Log in wrangler
 ```bash
