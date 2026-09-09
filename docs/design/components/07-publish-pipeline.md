@@ -142,7 +142,7 @@ The script's value is glue, not logic — verification is a staged end-to-end ru
 | dry run | `./scripts/publish.ps1 -DryRun` → rclone lists pending uploads, no deploy happens |
 | first publish | full run → site live on `picture-book.pages.dev`; gig page lightbox loads `web` images through `/img/...` |
 | idempotence | immediate second run → rclone transfers 0 files |
-| custom domain | after DNS: site + images load on `pictures.sixeyed.com`; `curl -I` on an image shows `cf-cache-status: HIT` on second request |
+| custom domain | after DNS: site + images load on `pictures.sixeyed.com`; `curl -I` on an image shows `cf-cache-status: HIT` on *a* repeat request (anycast: each colo caches independently, so not every repeat) |
 | download gating | editorial gig: full-res link downloads; display-only gig: `curl -I /img/full/<slug>/<file>` → 404 |
 
 ## 6. Acceptance criteria

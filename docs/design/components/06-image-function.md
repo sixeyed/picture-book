@@ -34,7 +34,14 @@ objects under the site's own domain, with hard edge caching.
 ```javascript
 const ALLOWED_PREFIXES = ["web/", "full/"];
 
-export async function onRequest({ request, params, env }) {
+// 304 if the client's validator matches this response's etag, else null.
+function notModified(request, response) {
+  if (!request.headers.get("if-none-match")) return null;
+  if (request.headers.get("if-none-match") !== response.headers.get("etag")) return null;
+  return new Response(null, { status: 304, headers: response.headers });
+}
+
+export async function onRequest({ request, params, env, waitUntil }) {
   if (request.method !== "GET" && request.method !== "HEAD") {
     return new Response("Method not allowed", { status: 405, headers: { allow: "GET, HEAD" } });
   }
@@ -49,6 +56,18 @@ export async function onRequest({ request, params, env }) {
     return new Response("Not found", { status: 404 });
   }
 
+  // Pages Functions are NOT edge-cached by the CDN automatically: without this every
+  // request costs a Worker invocation plus an R2 read, however immutable the header
+  // says the response is. GET only -- the Cache API will not store a HEAD. Absent
+  // under `node --test` (no `caches` global), where this degrades to the R2 path.
+  const cache = typeof caches !== "undefined" ? caches.default : null;
+  const cacheable = Boolean(cache) && request.method === "GET";
+
+  if (cacheable) {
+    const hit = await cache.match(request);
+    if (hit) return notModified(request, hit) ?? hit;
+  }
+
   const object = await env.PHOTOS.get(key);   // R2 get with no options also returns body
   if (!object) return new Response("Not found", { status: 404 });
 
@@ -57,6 +76,15 @@ export async function onRequest({ request, params, env }) {
   if (!headers.get("content-type")) headers.set("content-type", "image/jpeg");
   headers.set("etag", object.httpEtag);
   headers.set("cache-control", "public, max-age=31536000, immutable");
+
+  if (cacheable) {
+    // Store the full body even when this particular request gets a 304, so the next
+    // cold visitor is served from the edge rather than from R2.
+    const full = new Response(object.body, { headers });
+    const put = cache.put(request, full.clone());
+    if (waitUntil) waitUntil(put); else await put;
+    return notModified(request, full) ?? full;
+  }
 
   // Conditional requests: lightbox revisits should be 304s even past edge cache
   if (request.headers.get("if-none-match") === object.httpEtag) {
@@ -80,6 +108,16 @@ Design points:
   the edge and browsers may cache forever. Consequence: replacing an image's bytes
   under the same name will serve stale copies up to a year; rename instead
   (ASSUMPTIONS.md #7).
+- **Explicit edge cache (`caches.default`)** — a Pages Function response is **not**
+  CDN-cached automatically, however immutable its header says it is. Without the
+  Cache API every request costs a Worker invocation *and* an R2 read. `GET` only:
+  the Cache API refuses to store a `HEAD`. The write is handed to `waitUntil` when
+  the platform supplies it, so it doesn't delay the response. The `caches` global
+  does not exist under `node --test`, so the Function degrades to the direct R2 path
+  there — which is what the pre-existing tests exercise.
+- **Cache-fill happens even on a 304** — the full body is stored before the
+  conditional short-circuit, so a returning visitor's revalidation still warms the
+  edge for the next cold visitor.
 - **No listing, no auth** — URLs are unguessable only to the extent filenames are;
   this is a public gallery, so `web/` being fetchable is by design. `full/` objects
   simply don't exist in R2 for display-only gigs (enforced upstream by component 3),
@@ -130,10 +168,15 @@ const fakeR2 = (objects) => ({
 Integration smoke (manual): seed local R2 as in §3, `npx wrangler pages dev build`,
 confirm `curl -I localhost:8788/img/web/<slug>/<file>` returns 200 + immutable
 cache header, and a second browser load is served from cache (network tab: disk cache).
+Note `cf-cache-status` never appears locally — `wrangler pages dev` has no edge.
 
 ## 5. Acceptance criteria
 
 - [ ] `node --test scripts/img-function.test.mjs` passes.
 - [ ] Local smoke test above passes.
 - [ ] After first deploy: `curl -I https://pictures.sixeyed.com/img/web/<slug>/<file>`
-      → 200 with `cf-cache-status` header present (HIT on the second request).
+      → 200, and `cf-cache-status: HIT` once that edge location holds the object.
+      Cloudflare is anycast and each colo caches independently, so consecutive
+      requests may be served by different nodes and show no `cf-cache-status` at
+      all. A HIT appearing on *any* repeat request is the pass condition; expecting
+      it on *every* second request is wrong. Verified live 2026-09-09.

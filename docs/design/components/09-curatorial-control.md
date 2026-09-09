@@ -130,7 +130,7 @@ serialise as `1.0`). Uses `ConvertTo-Json -Depth 6` (deeper nesting now).
   tower over the centre stack). The balance point is gig-specific — a function of the
   images' aspect ratios — so it's a hand-tuned `widths`, not an automatic rule.
 
-## 7. Test coverage (all green: 79 node tests + 23 Pester)
+## 7. Test coverage (all green: 84 node tests + 23 Pester)
 
 - `gigs.test.mjs`: venue/artist/links/layout/column validation; **authored-order**
   loader test (filename-scrambled input returns in authored order).

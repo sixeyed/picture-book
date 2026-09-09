@@ -1,6 +1,7 @@
 export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/assets": "assets" });
   eleventyConfig.addPassthroughCopy({ "schema": "schema" });
+  eleventyConfig.addPassthroughCopy({ "src/_headers": "_headers" });  // Pages cache headers
 
   // Human-readable date for display: 2026-06-21 -> "21 June 2026"
   eleventyConfig.addFilter("displayDate", (iso) =>

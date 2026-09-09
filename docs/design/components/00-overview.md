@@ -146,7 +146,9 @@ Never upscale (if the original's long edge is smaller than the target, copy at
 original size). `full` is staged **only** when the gig's `permission` is not
 `display-only`. Filenames are preserved exactly — an image's public identity is
 `<slug>/<file>`, and cache headers are immutable, so a re-edited photo must be given
-a new filename (ASSUMPTIONS.md #7).
+a new filename (ASSUMPTIONS.md #7). Immutability is set in two places: the Function
+for `/img/...` (component 06) and `src/_headers` for `/thumbs/...`, copied to the
+build root by an Eleventy passthrough. `/assets/*` is deliberately excluded.
 
 ### 3.5 Gig content model (summary — full definition in 01, feature spec in 09)
 

@@ -146,3 +146,38 @@ implementation starts. Items marked **§11** resolve the spec's open decisions.
     The CNAME **host label is now `pictures`**, not `pictures.elton` — the record goes
     in the `sixeyed.com` zone. The apex `sixeyed.com` serves something else
     (`23.99.193.44`) and is untouched.
+
+21. **Edge caching made real (2026-09-09):** production verification after the first
+    deploy showed two documented claims were false, both about caching. Fixed rather
+    than re-documented, at the user's direction:
+
+    - **`/img/...` was not edge-cached at all.** A Pages Function response is not
+      CDN-cached automatically, however immutable its header claims to be, so every
+      request cost a Worker invocation *and* an R2 read. The Function now uses
+      `caches.default` explicitly (GET only — the Cache API refuses a `HEAD`), with
+      the write deferred through `waitUntil`. The cache is filled even when the
+      current request gets a 304, so a revalidation warms the edge for the next cold
+      visitor. Live check now shows `cf-cache-status: HIT`.
+    - **Thumbnails were not immutable.** They served Pages' default
+      `max-age=0, must-revalidate`, contradicting `CLAUDE.md` and overview §3.4. Added
+      `src/_headers` (Eleventy passthrough → build root) setting the immutable header
+      on `/thumbs/*`.
+
+    **`/assets/*` is deliberately excluded from immutability.** `site.css` and
+    `gallery.js` live at fixed, unversioned paths; an immutable cache would pin a
+    stale stylesheet on returning visitors for a year — which is the leading theory
+    for the one unreproduced thumbnail-overlap report (open item 3).
+
+    Consequence worth noting: the "rename a re-exported image" rule (#7) now genuinely
+    applies to thumbnails as well. Before this change they revalidated every request,
+    so the rule was effectively `/img/...`-only.
+
+    **Anycast caveat, learned live:** each Cloudflare colo caches independently, so
+    consecutive requests can land on different nodes and show no `cf-cache-status`.
+    A HIT on *any* repeat is the pass condition; expecting one on *every* second
+    request is wrong, and the old docs said exactly that.
+
+    Test baseline moved 79 → 84 node tests (5 new: cache miss stores, cache hit skips
+    R2, conditional hit returns 304 without reading R2, HEAD never stored, write goes
+    through `waitUntil`). `caches` does not exist under `node --test`, so the Function
+    degrades to the direct R2 path there and the pre-existing tests still cover it.

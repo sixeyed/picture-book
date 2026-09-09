@@ -161,8 +161,13 @@ Flags:
 ## Verify & costs
 
 - `curl -I https://pictures.sixeyed.com/img/web/<slug>/<file>` → `200` with
-  `cache-control: public, max-age=31536000, immutable`; a second request shows
-  `cf-cache-status: HIT`.
+  `cache-control: public, max-age=31536000, immutable`; a repeat request shows
+  `cf-cache-status: HIT`. Cloudflare is anycast and each edge location caches
+  independently, so some repeats are served by a colder node and carry no
+  `cf-cache-status` header — a HIT on *any* repeat is the pass condition.
+- `curl -I` on a thumbnail (`/thumbs/<slug>/<stem>-800.jpg`) → the same immutable
+  header, set by `src/_headers`. `/assets/site.css` deliberately stays on
+  `max-age=0, must-revalidate`.
 - A display-only gig's `/img/full/...` returns **404** (originals aren't uploaded for
   those) — that's correct.
 - Cloudflare dashboards (Pages + R2) show usage comfortably inside the free tiers.
@@ -171,9 +176,12 @@ Flags:
 
 ## Two things to know
 
-- **Re-editing a photo:** cache headers are immutable (1 year). Republishing changed
-  bytes under the **same filename** serves stale copies. Rule: give a re-exported image
-  a **new filename** (e.g. `P1000063-v2.jpg`).
+- **Re-editing a photo:** cache headers are immutable (1 year) on **both** the R2
+  images (`/img/...`, set by the Function) and the thumbnails (`/thumbs/...`, set by
+  `src/_headers`). Republishing changed bytes under the **same filename** serves stale
+  copies from browsers and the edge. Rule: give a re-exported image a **new filename**
+  (e.g. `P1000063-v2.jpg`). This applies to thumbnails too — before 2026-09-09 they
+  revalidated on every request, so the rule was effectively `/img/...`-only.
 - **Removing images / downgrading a gig to `display-only`:** `rclone copy` never deletes
   from R2, so the old `web/`/`full/` objects linger (unreferenced, but still fetchable
   for `full/`). To actually prune them, after a clean build run

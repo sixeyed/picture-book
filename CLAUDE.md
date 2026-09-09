@@ -33,7 +33,7 @@ Tests:
   (The old `ERR_MODULE_NOT_FOUND` on `node --test scripts/` was a Node 24.2.0 bug; it no
   longer reproduces on Node 26.8.1, but the bare form stays the supported invocation.)
 - pwsh: `pwsh -NoProfile -Command "Invoke-Pester scripts/new-gig.tests.ps1 -CI"`.
-- Current baseline: **79 node tests + 23 Pester**, all green.
+- Current baseline: **84 node tests + 23 Pester**, all green.
 
 Never commit `originals/`, `build/`, `.r2-stage/`, `node_modules/`, `.wrangler/`
 (all gitignored). Commit only when asked; end commit messages with the Co-Authored-By
@@ -78,7 +78,10 @@ columns fall back to portraits-flank / landscapes-centre. `permission` ∈
   Delete `build/thumbs/` to force thumbnail regen.
 - **`wrangler pages dev` caches its asset manifest at startup.** After any out-of-band
   change to `build/`, **restart the `web` container** or it serves stale/404s.
-- **Immutable 1-year cache** on `/img/...` and thumbnails: a re-edited photo republished
+- **Immutable 1-year cache** on `/img/...` (set by the Function) and `/thumbs/...`
+  (set by `src/_headers`). `/assets/*` is deliberately left revalidating — an
+  immutable stylesheet would pin a stale `site.css` on returning visitors for a year.
+  A re-edited photo republished
   under the same filename serves stale copies. Rule: rename re-exported images.
 - **`rclone copy` never deletes from R2.** Removed/revoked objects linger; prune only via
   a manual, inspected `rclone sync --dry-run` after a clean build.

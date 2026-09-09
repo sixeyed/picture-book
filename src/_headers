@@ -1,0 +1,10 @@
+# Cloudflare Pages response headers for static assets.
+# Thumbnails are content-stable: a re-exported photo must be given a NEW filename
+# (see CLAUDE.md), so they can be cached immutably for a year.
+/thumbs/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# NOTE: /assets/* is deliberately NOT immutable. site.css and gallery.js live at
+# fixed, unversioned paths, so an immutable cache would pin a stale stylesheet on
+# every returning visitor for a year -- the leading theory for the one unreproduced
+# thumbnail-overlap report. Leave these on the Pages default (revalidate).

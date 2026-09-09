@@ -7,8 +7,9 @@ dormant ~2 months. Read `CLAUDE.md` first (build commands + gotchas), then this.
 
 ## TL;DR
 
-**The site is LIVE** at `https://picture-book.pages.dev` (first deploy 2026-09-09).
-All nine components are implemented and committed; 79 node tests + 23 Pester green.
+**The site is LIVE** at `https://pictures.sixeyed.com` (custom domain, TLS issued
+2026-09-09; `picture-book.pages.dev` also serves it).
+All nine components are implemented and committed; 84 node tests + 23 Pester green.
 One real gig is published. R2 holds the 5 `web` renditions (1.23 MiB).
 
 Verified in production: pages, thumbnails, and `/img/web/...` streaming from R2
@@ -46,14 +47,14 @@ same change.
 `wrangler login`, Pages project `picture-book`, first deploy — all complete and
 verified live. `rclone` v1.75.1 and `wrangler` 4.130.0 are installed on the host.
 
-**Step 8 — custom domain — is the only one left, and it is yours:**
-1. Pages dashboard → project `picture-book` → *Custom domains* → Add
-   `pictures.sixeyed.com`. **Do this first.**
-2. At name.com: CNAME, host `pictures`, answer `picture-book.pages.dev`.
-3. Wait for the cert.
+**Step 8 is DONE too (2026-09-09). Phase 0 is complete — there is nothing left
+in `DEPLOYMENT.md` Part A.**
 
-Until then `site.url` (`https://pictures.sixeyed.com`) is what canonical/OG
-tags point at, so those references are live-but-unresolvable. Fixed by step 8.
+`pictures.sixeyed.com` resolves (CNAME → `picture-book.pages.dev`, TTL 300), serves
+HTTP/2 200, redirects http → https, and holds a valid cert (CN=`pictures.sixeyed.com`,
+Google Trust Services, 9 Sep → 8 Dec 2026). Verified live: all pages, thumbnails,
+`/img/web/...` from R2, `/img/full/...` → 404 for the display-only gig, and canonical
+tags pointing at the custom domain.
 
 **Pages project name changed 2026-09-08 — see ASSUMPTIONS #19.** The old name
 `pictures` was taken by a third party in the interim; the project is now
@@ -182,11 +183,13 @@ These are in `CLAUDE.md` but are worth repeating because each one cost real time
 - ~~Two months of dependency drift.~~ **Resolved 2026-09-04** — see ASSUMPTIONS #18.
   Baseline was verified green *before* touching anything, then everything moved to
   current: `sharp@^0.35.4`, `@11ty/eleventy@^3.1.6`, Docker base `node:26`, pwsh 7.6.5
-  (Pester 6.x). Re-verified green after: 79 node + 23 Pester, thumbnails regenerated
-  from scratch, page rendered and measured in the browser.
-  **Still open:** `wrangler.jsonc` `compatibility_date` is `2026-06-01` and `wrangler`
-  itself is un-pinned (`npx`, currently resolving 4.129.0). Decide the compat date
-  deliberately at deploy time — it changes runtime semantics, so it was left alone.
+  (Pester 6.x). Re-verified green after: 79 node + 23 Pester (the baseline *that day*;
+  now 84 after the edge-cache tests — ASSUMPTIONS #21), thumbnails regenerated from
+  scratch, page rendered and measured in the browser.
+  **Still open:** `wrangler.jsonc` `compatibility_date` is still `2026-06-01` — never
+  decided, and now the site is live, so changing it alters production runtime
+  semantics. `wrangler` is installed on the host at **4.130.0** (no longer via `npx`)
+  but is still not pinned in the repo.
 
 ---
 
