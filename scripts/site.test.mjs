@@ -62,7 +62,9 @@ const DISPLAY_ONLY_GIG = {
   images: [{ file: "P2000001.jpg", width: 5000, height: 3333 }],
 };
 
-async function withBuiltSite(fn) {
+const ALL_GIGS = [EDITORIAL_GIG, DISPLAY_ONLY_GIG, SPECIAL_CHARS_GIG];
+
+async function withBuiltSite(fn, gigs = ALL_GIGS) {
   const dir = await mkdtemp(join(tmpdir(), "site-test-"));
   try {
     await cp(join(repoRoot, "src"), join(dir, "src"), { recursive: true });
@@ -71,9 +73,9 @@ async function withBuiltSite(fn) {
     await cp(join(repoRoot, "scripts", "lib", "gigs.mjs"), join(dir, "scripts", "lib", "gigs.mjs"));
     await cp(join(repoRoot, "schema"), join(dir, "schema"), { recursive: true });
     await mkdir(join(dir, "gigs"), { recursive: true });
-    await writeFile(join(dir, "gigs", `${EDITORIAL_GIG.slug}.json`), JSON.stringify(EDITORIAL_GIG));
-    await writeFile(join(dir, "gigs", `${DISPLAY_ONLY_GIG.slug}.json`), JSON.stringify(DISPLAY_ONLY_GIG));
-    await writeFile(join(dir, "gigs", `${SPECIAL_CHARS_GIG.slug}.json`), JSON.stringify(SPECIAL_CHARS_GIG));
+    for (const gig of gigs) {
+      await writeFile(join(dir, "gigs", `${gig.slug}.json`), JSON.stringify(gig));
+    }
 
     process.chdir(dir);
     try {
@@ -242,5 +244,59 @@ test("escaping: gig title with & and quotes is escaped exactly once in <title> a
     assert(!html.includes("&amp;quot;"), "must not double-escape quotes");
     assert(/<title>Rock &amp; Roll (&quot;|")Night(&quot;|") — /.test(html), "title tag single-escaped");
     assert(/<meta property="og:title" content="Rock &amp; Roll &quot;Night&quot; — /.test(html), "og:title single-escaped");
+  });
+});
+
+// Gig nav follows date order: editorial-gig (2026) is newest, display-only-gig
+// (2025) sits in the middle, special-chars-gig (2024) is oldest. "Previous" is
+// the next-older gig, "Next" the next-newer; no wrap-around at either end.
+test("gig nav: middle gig links Previous to the older gig and Next to the newer gig", async () => {
+  await withBuiltSite(async (dir) => {
+    const html = await readBuild(dir, "display-only-gig/index.html");
+    assert(html.includes('<nav class="gig-nav"'), "gig page should render the gig nav");
+    assert(
+      /<a class="gig-nav-prev" rel="prev" href="\/special-chars-gig\/">/.test(html),
+      "Previous should point at the next-older gig"
+    );
+    assert(
+      /<a class="gig-nav-next" rel="next" href="\/editorial-gig\/">[\s\S]*?Editorial Gig[\s\S]*?<\/a>/.test(html),
+      "Next should point at the next-newer gig and show its title"
+    );
+  });
+});
+
+test("gig nav: comes after the gallery grid, outside the .columns contract", async () => {
+  await withBuiltSite(async (dir) => {
+    const html = await readBuild(dir, "display-only-gig/index.html");
+    const lastThumb = html.lastIndexOf('class="thumb"');
+    const nav = html.indexOf('<nav class="gig-nav"');
+    assert(lastThumb >= 0 && nav > lastThumb, "nav should follow the last thumb");
+  });
+});
+
+test("gig nav: newest gig has no Next, oldest gig has no Previous", async () => {
+  await withBuiltSite(async (dir) => {
+    const newest = await readBuild(dir, "editorial-gig/index.html");
+    assert(!newest.includes("gig-nav-next"), "newest gig must not render a Next link");
+    assert(newest.includes('href="/display-only-gig/"'), "newest gig still links Previous to the older gig");
+
+    const oldest = await readBuild(dir, "special-chars-gig/index.html");
+    assert(!oldest.includes("gig-nav-prev"), "oldest gig must not render a Previous link");
+    assert(oldest.includes('href="/display-only-gig/"'), "oldest gig still links Next to the newer gig");
+  });
+});
+
+test("gig nav: a single-gig site renders no nav at all", async () => {
+  await withBuiltSite(async (dir) => {
+    const html = await readBuild(dir, "editorial-gig/index.html");
+    assert(!html.includes("gig-nav"), "no nav element when there is nowhere to go");
+  }, [EDITORIAL_GIG]);
+});
+
+test("gig nav: linked gig title with & and quotes is escaped exactly once", async () => {
+  await withBuiltSite(async (dir) => {
+    const html = await readBuild(dir, "display-only-gig/index.html");
+    assert(/<span class="gig-nav-title">Rock &amp; Roll (&quot;|")Night(&quot;|")<\/span>/.test(html), "nav title single-escaped");
+    assert(!html.includes("&amp;amp;"), "must not double-escape ampersands");
   });
 });

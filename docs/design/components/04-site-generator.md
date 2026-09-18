@@ -159,6 +159,27 @@ when `gig.permission != "display-only"`, → `img` with dimensions and
 `loading="lazy"`; image order comes pre-sorted from the loader). This markup is
 the interface with component 5 — any change must be agreed in the overview first.
 
+**Gig nav (added 2026-09-18).** After the gallery grid — and *outside* `.columns`, so
+the §3.6 contract is untouched — `gig.njk` renders Previous/Next links between gigs:
+
+```njk
+{% if gig.older or gig.newer %}
+<nav class="gig-nav" aria-label="More gigs">
+  {% if gig.older %}<a class="gig-nav-prev" rel="prev" href="/{{ gig.older.slug }}/">
+    <span class="gig-nav-label">← Previous</span>
+    <span class="gig-nav-title">{{ gig.older.title }}</span></a>{% endif %}
+  {% if gig.newer %}<a class="gig-nav-next" rel="next" href="/{{ gig.newer.slug }}/">…</a>{% endif %}
+</nav>
+{% endif %}
+```
+
+`gig.older` / `gig.newer` are `{ slug, title }` or `null`, set in `src/_data/gigs.js`
+from the gig's neighbours in the newest-first list `loadGigs` returns — the ordering
+logic stays in the data layer, not the template. Direction is chronological:
+**Previous = next-older gig, Next = next-newer gig**. No wrap-around: the newest gig
+has no Next, the oldest no Previous, and a single-gig site renders no `<nav>` at all
+(ASSUMPTIONS #23).
+
 ### `src/about.njk`
 
 Front matter: `layout: base.njk`, `permalink: /about/`, `title: About`.
@@ -186,6 +207,7 @@ Add test file `scripts/site.test.mjs` (runner: `node --test`) that:
 | permission | editorial gig: `data-download="true"` and has `data-full`; display-only: `data-download="false"` and has no `data-full` attribute at all |
 | OG tags | gig page has `og:image` ending `/img/web/<slug>/<cover>` |
 | gallery script | present on gig pages, absent on home/about |
+| gig nav | middle gig: `a.gig-nav-prev[rel=prev]` → older gig, `a.gig-nav-next[rel=next]` → newer gig with its title; nav comes after the last `a.thumb`; newest gig has no Next, oldest no Previous; single-gig site has no `.gig-nav`; linked title with `&`/quotes escaped exactly once |
 
 ## 5. Acceptance criteria
 

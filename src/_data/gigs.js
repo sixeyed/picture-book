@@ -51,5 +51,14 @@ export default async function () {
     gig.columnGroups = groups;
     gig.coverImage = gig.images.find((i) => i.file === gig.cover);
   }
+
+  // Gig-to-gig nav. loadGigs sorts newest first, so the neighbour before a gig
+  // is the next-newer one ("Next") and the one after is the next-older
+  // ("Previous"). No wrap-around: the ends are null and the template omits them.
+  const navLink = (g) => (g ? { slug: g.slug, title: g.title } : null);
+  gigs.forEach((gig, i) => {
+    gig.newer = navLink(gigs[i - 1]);
+    gig.older = navLink(gigs[i + 1]);
+  });
   return gigs;
 }

@@ -69,6 +69,14 @@ CSS + vanilla JS, no frameworks, no build step — these files ship as written.
   §11.3) — hover is just the subtle image treatment (`opacity: .9`); no text overlay.
 - **Gig blurb:** `p.blurb` under the gig heading — `--text-dim`, `0.95rem`,
   `max-width: 65ch`.
+- **Gig nav (`nav.gig-nav`, added 2026-09-18):** Previous/Next links between gigs,
+  below the gallery (`margin-top: 48px`), markup from component 4. A flex row,
+  `justify-content: space-between`: `a.gig-nav-prev` left, `a.gig-nav-next` right
+  (`margin-left: auto; text-align: right`, so a lone Next still sits right). Each
+  link stacks a `--text-dim` `0.85rem` direction label over the gig title in
+  `--text`; hover turns the title `--accent`, no underline. Text only — no
+  thumbnails. Stays a single row on phones. Deliberately **no keyboard shortcut**:
+  ArrowLeft/ArrowRight belong to the lightbox (§2).
 - **Lightbox (`dialog.lightbox`):** styles for the element defined in §2 —
   full-viewport (`width/height: 100vw/100dvh; max-width/height: none`), background
   `rgb(0 0 0 / .96)`, no border. Image centered,
@@ -166,6 +174,7 @@ site under `npx wrangler pages dev build`:
 | deep link | open `/<slug>/#<stem>` → lightbox opens on that image; closing removes the hash; hash updates while navigating |
 | download visibility | editorial gig shows "Full resolution" linking `/img/full/...`; display-only gig shows none |
 | blurb | gig with a `description` shows it under the heading; empty description shows nothing |
+| gig nav | below the grid: Previous (older) left, Next (newer) right, each showing the gig title; newest gig shows only Previous, oldest only Next; links navigate; arrow keys do nothing outside the lightbox |
 | layout | no layout shift while thumbs load (aspect-ratio boxes); grid reflows 4→2→1 columns across viewport widths |
 | a11y quick pass | tab through grid; open via Enter; buttons announce labels (VoiceOver spot check) |
 

@@ -181,3 +181,38 @@ implementation starts. Items marked **§11** resolve the spec's open decisions.
     R2, conditional hit returns 304 without reading R2, HEAD never stored, write goes
     through `waitUntil`). `caches` does not exist under `node --test`, so the Function
     degrades to the direct R2 path there and the pre-existing tests still cover it.
+
+22. **`origin` moved to a self-hosted forge (2026-09-12):** the GitHub remote
+    recorded on 2026-09-09 is no longer `origin`. It was renamed `github`, and a new
+    `origin` points at a private self-hosted forge (address deliberately not recorded
+    in this public repo — `git remote -v` has it). A bare `git push` goes to the forge
+    alone; GitHub is where the code is public.
+
+    **Consequence: the GitHub copy is now a mirror that has to be pushed by hand**
+    (`git push github main`). Nothing enforces the two staying in sync, and nothing
+    breaks when they drift — deploys are direct `wrangler` uploads with no git
+    integration (`docs/DEPLOYMENT.md`), so publishing is unaffected by either remote.
+
+    Neither remote changes the standing `originals/` backup risk: both carry
+    `gigs/*.json` and no pixels (HANDOFF.md, risks).
+
+23. **Gig pages link to their neighbours — Previous/Next (2026-09-18):** each gig
+    page ends with a `nav.gig-nav` below the gallery. Decisions, agreed with the user:
+
+    - **Direction is chronological.** "← Previous" is the next-*older* gig, "Next →"
+      the next-*newer* — "next gig" reads as the one that happened afterwards. The
+      alternative (Next = continue down the newest-first home page, i.e. older) was
+      considered and rejected.
+    - **No wrap-around.** The newest gig has no Next and the oldest no Previous; the
+      missing side is omitted, and a single-gig site renders no nav.
+    - **Each link shows the target gig's title** under the direction label; text
+      only, no thumbnails.
+    - **No keyboard shortcuts** — the arrow keys already drive the lightbox.
+
+    Neighbours (`gig.older` / `gig.newer`) are computed in `src/_data/gigs.js` from
+    the `loadGigs` order, and the nav sits outside `.columns`, so the overview §3.6
+    gallery markup contract is unchanged (components 04 and 05 updated).
+
+    Test baseline moved 84 → 89 node tests (5 new gig-nav tests in
+    `scripts/site.test.mjs`; `withBuiltSite` now takes an optional fixture-gig list
+    so the single-gig case can be built).

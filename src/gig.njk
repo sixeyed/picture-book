@@ -44,3 +44,19 @@
   </div>
   {% endfor %}
 </div>
+{% if gig.older or gig.newer %}
+<nav class="gig-nav" aria-label="More gigs">
+  {% if gig.older %}
+  <a class="gig-nav-prev" rel="prev" href="/{{ gig.older.slug }}/">
+    <span class="gig-nav-label">← Previous</span>
+    <span class="gig-nav-title">{{ gig.older.title }}</span>
+  </a>
+  {% endif %}
+  {% if gig.newer %}
+  <a class="gig-nav-next" rel="next" href="/{{ gig.newer.slug }}/">
+    <span class="gig-nav-label">Next →</span>
+    <span class="gig-nav-title">{{ gig.newer.title }}</span>
+  </a>
+  {% endif %}
+</nav>
+{% endif %}

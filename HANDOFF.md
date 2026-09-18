@@ -9,7 +9,7 @@ dormant ~2 months. Read `CLAUDE.md` first (build commands + gotchas), then this.
 
 **The site is LIVE** at `https://pictures.sixeyed.com` (custom domain, TLS issued
 2026-09-09; `picture-book.pages.dev` also serves it).
-All nine components are implemented and committed; 84 node tests + 23 Pester green.
+All nine components are implemented and committed; 89 node tests + 23 Pester green.
 One real gig is published. R2 holds the 5 `web` renditions (1.23 MiB).
 
 Verified in production: pages, thumbnails, and `/img/web/...` streaming from R2
@@ -177,10 +177,21 @@ These are in `CLAUDE.md` but are worth repeating because each one cost real time
 
 ## Risks worth raising with the user
 
-- ~~No git remote is configured.~~ **Resolved 2026-09-09** — `origin` is
-  https://github.com/sixeyed/picture-book (public). History was scanned before
-  publishing: no real account ID (only the `<ACCOUNT_ID>` placeholder), no credential
-  files, no internal hostnames or IPs.
+- ~~No git remote is configured.~~ **Resolved 2026-09-09; remotes re-pointed
+  2026-09-12** — there are now two:
+
+  | Remote | Role |
+  |---|---|
+  | `origin` | private self-hosted forge; the default push target (URL deliberately not recorded — see `git remote -v`) |
+  | `github` | https://github.com/sixeyed/picture-book — the **public** copy of the code |
+
+  A bare `git push` reaches only the forge. The public GitHub copy needs an explicit
+  `git push github main` or it silently falls behind. Neither remote gates the live
+  site — deploys are direct `wrangler` uploads (`docs/DEPLOYMENT.md`).
+
+  History was scanned before publishing to GitHub: no real account ID (only the
+  `<ACCOUNT_ID>` placeholder), no credential files, no internal hostnames or IPs.
+  Keep it that way — the forge's address stays out of the repo.
 
 - **`originals/` still has NO off-machine copy, and GitHub does not change that.**
   This is the real remaining risk. Git carries `gigs/*.json` (the recipe) but

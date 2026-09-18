@@ -187,6 +187,43 @@ header a:first-child {
   border-color: var(--accent);
 }
 
+/* Gig nav — Previous (older) left, Next (newer) right. Either side may be
+   absent at the ends of the list; margin-left: auto keeps a lone Next on the
+   right. */
+
+.gig-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--gap);
+  margin-top: 48px;
+}
+
+.gig-nav a {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  color: var(--text);
+}
+
+.gig-nav-next {
+  margin-left: auto;
+  text-align: right;
+}
+
+.gig-nav-label {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.gig-nav a:hover {
+  text-decoration: none;
+}
+
+.gig-nav a:hover .gig-nav-title {
+  color: var(--accent);
+}
+
 /* Lightbox */
 
 .lightbox {
