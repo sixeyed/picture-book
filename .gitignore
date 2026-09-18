@@ -4,3 +4,4 @@ build/
 .r2-stage/
 .wrangler/
 testResults.xml
+.DS_Store
