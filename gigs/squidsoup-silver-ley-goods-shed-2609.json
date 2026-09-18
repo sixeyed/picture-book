@@ -1,0 +1,38 @@
+{
+  "$schema": "../schema/gig.schema.json",
+  "slug": "squidsoup-silver-ley-goods-shed-2609",
+  "title": "Squidsoup & Silver Ley",
+  "date": "2026-09-11",
+  "venue": {
+    "name": "Goods Shed",
+    "location": "Stroud, UK",
+    "links": [
+      { "label": "Website", "url": "https://www.sva.org.uk/goods-shed-sessions" },
+      { "label": "Facebook", "url": "https://www.facebook.com/thegoodsshedstroud/" }
+    ]
+  },
+  "artists": [
+    {
+      "name": "Squidsoup",
+      "links": [
+        { "label": "Website", "url": "https://www.squidsoup.org/" }
+      ]
+    },
+    {
+      "name": "Silver Ley",
+      "links": []
+    }
+  ],
+  "permission": "display-only",
+  "description": "",
+  "cover": "P1031059.jpg",
+  "layout": { "columns": 3, "widths": [1, 1.625, 1] },
+  "images": [
+    { "file": "P1031065.jpg", "width": 4008, "height": 6008, "column": 0 },
+    { "file": "P1031059.jpg", "width": 6008, "height": 4008, "column": 1 },
+    { "file": "P1031069.jpg", "width": 4008, "height": 6008, "column": 2 },
+    { "file": "P1031009.jpg", "width": 6008, "height": 4008, "column": 0 },
+    { "file": "P1031051.jpg", "width": 6008, "height": 4008, "column": 1 },
+    { "file": "P1031031.jpg", "width": 6008, "height": 4008, "column": 2 }
+  ]
+}
