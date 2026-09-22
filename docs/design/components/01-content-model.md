@@ -31,6 +31,7 @@ to load gigs consistently.
 | `slug` | string | yes | `^[a-z0-9]+(-[a-z0-9]+)*$`; must equal the file name (`gigs/<slug>.json`); becomes the URL path and R2 prefix |
 | `title` | string | yes | non-empty; display name |
 | `date` | string | yes | `YYYY-MM-DD`; used for sorting (desc) and display |
+| `time` | string | no | `HH:MM` (24h, the camera's local clock). Orders gigs that share a `date` — festival days; never displayed (added 2026-09-22, ASSUMPTIONS #24) |
 | `venue` | string | yes | non-empty |
 | `location` | string | yes | e.g. `"Sheffield, UK"` |
 | `artists` | string[] | yes | at least one entry |
@@ -158,7 +159,9 @@ Design points:
 - `description` is defaulted to `""` at load time so consumers never null-check it.
 - Image display order is imposed here (filename sort, ≈ capture order for camera
   files) so no consumer depends on hand-maintained JSON order.
-- Gig sorting is a plain string compare on `date` (ISO dates sort lexically).
+- Gig sorting is a plain string compare on `date + " " + (time ?? "")` (ISO dates and
+  24h times sort lexically). Ties on `date` are broken by `time`, latest first; an
+  untimed gig sorts after every timed gig on the same day.
 - The optional `$schema` key in gig files is ignored by `validateGig` (skip it when
   checking for unknown fields, if unknown-field checking is added).
 

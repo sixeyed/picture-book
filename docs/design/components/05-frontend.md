@@ -51,7 +51,12 @@ CSS + vanilla JS, no frameworks, no build step — these files ship as written.
   `grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px`.
   Card = cover image (`width: 100%; height: auto; border-radius: var(--radius)`),
   title in `1.1rem`, venue/date line in `--text-dim` `0.85rem`. Whole card is the
-  anchor; subtle hover: image `opacity: .85`.
+  anchor; subtle hover: image `opacity: .85`. **Since 2026-09-22** the image box is
+  a fixed `aspect-ratio: 3 / 2` with `object-fit: contain`: every card in a row is
+  the same height so titles line up, and a cover of any other shape (a panorama, a
+  portrait) is letterboxed — centred with the page background showing — never
+  cropped. Covers should still be landscape by preference; the frame just stops an
+  odd one skewing the row.
 - **Gig grid (`ul.grid`):** CSS multi-column masonry preserving aspect ratio, no
   cropping:
 

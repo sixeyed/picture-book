@@ -31,6 +31,10 @@ export function validateGig(gig, fileName) {
   if (gig.slug && basename(fileName, ".json") !== gig.slug)
     err(`slug "${gig.slug}" does not match file name`);
   if (gig.date && !/^\d{4}-\d{2}-\d{2}$/.test(gig.date)) err(`invalid date "${gig.date}"`);
+  // time: optional "HH:MM" (24h). Only orders gigs that share a date (festival
+  // days); never displayed.
+  if (gig.time !== undefined && !(typeof gig.time === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(gig.time)))
+    err(`invalid time "${gig.time}" (expected HH:MM)`);
 
   // venue: { name, location, links? }
   if (typeof gig.venue !== "object" || gig.venue === null || Array.isArray(gig.venue)) {
@@ -98,6 +102,10 @@ export function validateGig(gig, fileName) {
   return errors;
 }
 
+/** Sort key: date, then time. An untimed gig sorts after every timed gig on the
+ *  same day ("" < "HH:MM"), so it lands at the end of that day's run. */
+const when = (g) => `${g.date} ${g.time ?? ""}`;
+
 /** Load all gigs from a directory, throw with every problem listed, sort newest first. */
 export async function loadGigs(dir = "gigs") {
   const files = (await readdir(dir)).filter((f) => f.endsWith(".json")).sort();
@@ -119,5 +127,5 @@ export async function loadGigs(dir = "gigs") {
     gigs.push(gig);
   }
   if (errors.length) throw new Error(`Gig validation failed:\n  ${errors.join("\n  ")}`);
-  return gigs.sort((a, b) => b.date.localeCompare(a.date));
+  return gigs.sort((a, b) => when(b).localeCompare(when(a)));
 }

@@ -216,3 +216,20 @@ implementation starts. Items marked **§11** resolve the spec's open decisions.
     Test baseline moved 84 → 89 node tests (5 new gig-nav tests in
     `scripts/site.test.mjs`; `withBuiltSite` now takes an optional fixture-gig list
     so the single-gig case can be built).
+
+24. **Optional `time` on a gig, to order festival days (2026-09-22):** five Hidden
+    Notes sets on 2026-09-19 exposed that `loadGigs` sorted on `date` alone, leaving
+    same-day gigs in filename (alphabetical) order — so the home page and the new
+    Previous/Next nav (#23) ran Adrian Utley → afromerm → Poppy Ackroyd → Širom →
+    Yann Tiersen instead of the running order. Agreed with the user:
+
+    - New optional `time` field, `HH:MM` 24h, validated in `validateGig` and
+      `gig.schema.json`. Sort key is `date + " " + (time ?? "")`; untimed gigs sort
+      after timed ones on the same day. Existing gigs are untouched.
+    - The value is the camera's local clock (EXIF `DateTimeOriginal`), **not**
+      `mdls`, which reports UTC and was an hour out under BST.
+    - `time` is never displayed — it only orders. Showing it would be a separate
+      decision. `new-gig.ps1` does not set it; it is hand-added when needed.
+
+    Test baseline moved 89 → 91 node tests (time validation; date+time sort with
+    an untimed gig and a next-day gig in `scripts/lib/gigs.test.mjs`).

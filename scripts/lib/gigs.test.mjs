@@ -282,6 +282,33 @@ test("loadGigs: multiple gigs sorted newest first", async () => {
   assert.equal(gigs[1].date, "2026-06-21", "Older date should be second");
 });
 
+test("validateGig: optional time must be HH:MM (24h)", () => {
+  assert.deepEqual(validateGig(makeGig({ time: "14:34" }), "summer-fest.json"), []);
+  assert.deepEqual(validateGig(makeGig({ time: "00:00" }), "summer-fest.json"), []);
+  for (const bad of ["2:34pm", "14:34:00", "24:00", "14.34", 1434, ""]) {
+    const errors = validateGig(makeGig({ time: bad }), "summer-fest.json");
+    assert(errors.some((e) => e.includes("invalid time")), `should reject time ${JSON.stringify(bad)}`);
+  }
+});
+
+test("loadGigs: same-date gigs sort by time, latest first; untimed gigs sort after timed ones", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "gigs-"));
+
+  // Written in an order that is neither chronological nor alphabetical, so the
+  // result can only come from the sort.
+  const gigs = [
+    makeGig({ slug: "b-evening", date: "2026-09-19", time: "20:28" }),
+    makeGig({ slug: "a-afternoon", date: "2026-09-19", time: "14:34" }),
+    makeGig({ slug: "c-untimed", date: "2026-09-19" }),
+    makeGig({ slug: "d-next-day", date: "2026-09-20" }),
+    makeGig({ slug: "e-teatime", date: "2026-09-19", time: "16:57" }),
+  ];
+  for (const g of gigs) await writeFile(join(dir, `${g.slug}.json`), JSON.stringify(g));
+
+  const order = (await loadGigs(dir)).map((g) => g.slug);
+  assert.deepEqual(order, ["d-next-day", "b-evening", "e-teatime", "a-afternoon", "c-untimed"]);
+});
+
 test("loadGigs: malformed JSON file throws with filename", async () => {
   const dir = await mkdtemp(join(tmpdir(), "gigs-"));
 

@@ -41,6 +41,8 @@ pwsh ./scripts/new-gig.ps1 \
   outer columns and landscapes to the centre. Optionally set
   `layout.widths` (e.g. `[1, 1.07, 1]`) to balance column heights.
 - **`description`** — an optional one-line blurb shown under the heading.
+- **`time`** — optional `HH:MM`; only needed when several gigs share a date (a festival
+  day), to keep the home page and Previous/Next links in running order. Not shown.
 - **`cover`** — which image is the home-page card (defaults to the first).
 
 **3. Preview locally** (optional):

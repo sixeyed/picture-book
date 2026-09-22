@@ -87,9 +87,14 @@ header a:first-child {
   color: var(--text);
 }
 
+/* Every card frame is 3:2 so titles line up across a row. A cover with a
+   different shape is letterboxed (centred, page background showing), never
+   cropped. */
 .cards img {
   width: 100%;
   height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: contain;
   border-radius: var(--radius);
   display: block;
 }

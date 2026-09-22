@@ -183,6 +183,9 @@ build root by an Eleventy passthrough. `/assets/*` is deliberately excluded.
   `column` (0-based). Both default via the data layer (columns = 3; portraits flank
   the outer columns, landscapes stack in the centre). Full definition in 09.
 - `description` — optional per-gig blurb (the only caption text; no per-image captions).
+- `time` (optional, `HH:MM`) — breaks the newest-first sort for gigs sharing a `date`
+  (festival days), so the home page and gig-to-gig nav follow the running order. Not
+  displayed. Untimed gigs sort after timed ones on the same day.
 - `width`/`height` are the original's pixel dimensions (enables `aspect-ratio` CSS).
 - `permission` ∈ `display-only | editorial | commercial`; anything other than
   `display-only` shows the full-res download link and stages `full/` to R2.

@@ -33,7 +33,7 @@ Tests:
   (The old `ERR_MODULE_NOT_FOUND` on `node --test scripts/` was a Node 24.2.0 bug; it no
   longer reproduces on Node 26.8.1, but the bare form stays the supported invocation.)
 - pwsh: `pwsh -NoProfile -Command "Invoke-Pester scripts/new-gig.tests.ps1 -CI"`.
-- Current baseline: **89 node tests + 23 Pester**, all green.
+- Current baseline: **91 node tests + 23 Pester**, all green.
 
 Never commit `originals/`, `build/`, `.r2-stage/`, `node_modules/`, `.wrangler/`
 (all gitignored). Commit only when asked; end commit messages with the Co-Authored-By
