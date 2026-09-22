@@ -1,0 +1,65 @@
+{
+  "$schema": "../schema/gig.schema.json",
+  "slug": "poppy-ackroyd-hidden-notes-2609",
+  "title": "Poppy Ackroyd",
+  "date": "2026-09-19",
+  "time": "17:57",
+  "venue": {
+    "name": "St Laurence Church",
+    "location": "Stroud, UK",
+    "links": [
+      {
+        "label": "Hidden Notes",
+        "url": "https://hiddennotes.co.uk/"
+      }
+    ]
+  },
+  "artists": [
+    {
+      "name": "Poppy Ackroyd",
+      "links": [
+        {
+          "label": "Website",
+          "url": "https://poppyackroyd.com/"
+        }
+      ]
+    }
+  ],
+  "permission": "display-only",
+  "description": "",
+  "cover": "P1031177.jpg",
+  "layout": {
+    "columns": 3,
+    "widths": [
+      1,
+      1.14,
+      1.04
+    ]
+  },
+  "images": [
+    {
+      "file": "P1031152.jpg",
+      "width": 2530,
+      "height": 3312,
+      "column": 0
+    },
+    {
+      "file": "P1031175.jpg",
+      "width": 5175,
+      "height": 2488,
+      "column": 1
+    },
+    {
+      "file": "P1031177.jpg",
+      "width": 4937,
+      "height": 3288,
+      "column": 1
+    },
+    {
+      "file": "P1031186.jpg",
+      "width": 3281,
+      "height": 4136,
+      "column": 2
+    }
+  ]
+}

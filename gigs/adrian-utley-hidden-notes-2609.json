@@ -1,0 +1,59 @@
+{
+  "$schema": "../schema/gig.schema.json",
+  "slug": "adrian-utley-hidden-notes-2609",
+  "title": "Adrian Utley",
+  "date": "2026-09-19",
+  "time": "19:23",
+  "venue": {
+    "name": "St Laurence Church",
+    "location": "Stroud, UK",
+    "links": [
+      {
+        "label": "Hidden Notes",
+        "url": "https://hiddennotes.co.uk/"
+      }
+    ]
+  },
+  "artists": [
+    {
+      "name": "Adrian Utley",
+      "links": []
+    }
+  ],
+  "permission": "display-only",
+  "description": "",
+  "cover": "P1031213.jpg",
+  "layout": {
+    "columns": 2,
+    "widths": [
+      1.53,
+      1
+    ]
+  },
+  "images": [
+    {
+      "file": "P1031192.jpg",
+      "width": 4008,
+      "height": 3379,
+      "column": 0
+    },
+    {
+      "file": "P1031207.jpg",
+      "width": 5911,
+      "height": 3361,
+      "column": 0
+    },
+    {
+      "file": "P1031213.jpg",
+      "width": 4674,
+      "height": 3070,
+      "column": 1
+    },
+    {
+      "file": "P1031214.jpg",
+      "width": 4008,
+      "height": 6008,
+      "column": 1
+    }
+  ]
+}

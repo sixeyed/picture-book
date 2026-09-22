@@ -1,0 +1,71 @@
+{
+  "$schema": "../schema/gig.schema.json",
+  "slug": "sirom-hidden-notes-2609",
+  "title": "Širom",
+  "date": "2026-09-19",
+  "time": "16:45",
+  "venue": {
+    "name": "St Laurence Church",
+    "location": "Stroud, UK",
+    "links": [
+      {
+        "label": "Hidden Notes",
+        "url": "https://hiddennotes.co.uk/"
+      }
+    ]
+  },
+  "artists": [
+    {
+      "name": "Širom",
+      "links": [
+        {
+          "label": "Bandcamp",
+          "url": "https://sirom.bandcamp.com/"
+        }
+      ]
+    }
+  ],
+  "permission": "display-only",
+  "description": "",
+  "cover": "P1031108.jpg",
+  "layout": {
+    "columns": 3,
+    "widths": [
+      1,
+      1.34,
+      1.37
+    ]
+  },
+  "images": [
+    {
+      "file": "P1031108.jpg",
+      "width": 5163,
+      "height": 3313,
+      "column": 1
+    },
+    {
+      "file": "P1031118.jpg",
+      "width": 1476,
+      "height": 2331,
+      "column": 0
+    },
+    {
+      "file": "P1031120.jpg",
+      "width": 2009,
+      "height": 3294,
+      "column": 2
+    },
+    {
+      "file": "P1031121.jpg",
+      "width": 6008,
+      "height": 4008,
+      "column": 0
+    },
+    {
+      "file": "P1031124.jpg",
+      "width": 2948,
+      "height": 3040,
+      "column": 1
+    }
+  ]
+}

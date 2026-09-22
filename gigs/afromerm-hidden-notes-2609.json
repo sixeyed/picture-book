@@ -1,0 +1,58 @@
+{
+  "$schema": "../schema/gig.schema.json",
+  "slug": "afromerm-hidden-notes-2609",
+  "title": "afromerm",
+  "date": "2026-09-19",
+  "time": "15:34",
+  "venue": {
+    "name": "St Laurence Church",
+    "location": "Stroud, UK",
+    "links": [
+      {
+        "label": "Hidden Notes",
+        "url": "https://hiddennotes.co.uk/"
+      }
+    ]
+  },
+  "artists": [
+    {
+      "name": "afromerm",
+      "links": [
+        {
+          "label": "Bandcamp",
+          "url": "https://afromerm.bandcamp.com/"
+        }
+      ]
+    }
+  ],
+  "permission": "display-only",
+  "description": "",
+  "cover": "P1031089.jpg",
+  "layout": {
+    "columns": 2,
+    "widths": [
+      1,
+      1.19
+    ]
+  },
+  "images": [
+    {
+      "file": "P1031089.jpg",
+      "width": 4105,
+      "height": 1907,
+      "column": 0
+    },
+    {
+      "file": "P1031094.jpg",
+      "width": 2166,
+      "height": 3742,
+      "column": 1
+    },
+    {
+      "file": "P1031097.jpg",
+      "width": 1511,
+      "height": 2408,
+      "column": 0
+    }
+  ]
+}

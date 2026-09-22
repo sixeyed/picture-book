@@ -1,0 +1,83 @@
+{
+  "$schema": "../schema/gig.schema.json",
+  "slug": "yann-tiersen-hidden-notes-2609",
+  "title": "Yann Tiersen",
+  "date": "2026-09-19",
+  "time": "20:33",
+  "venue": {
+    "name": "St Laurence Church",
+    "location": "Stroud, UK",
+    "links": [
+      {
+        "label": "Hidden Notes",
+        "url": "https://hiddennotes.co.uk/"
+      }
+    ]
+  },
+  "artists": [
+    {
+      "name": "Yann Tiersen",
+      "links": [
+        {
+          "label": "Website",
+          "url": "https://www.yanntiersen.com/"
+        }
+      ]
+    }
+  ],
+  "permission": "display-only",
+  "description": "",
+  "cover": "P1031253.jpg",
+  "layout": {
+    "columns": 3,
+    "widths": [
+      1.16,
+      1.21,
+      1
+    ]
+  },
+  "images": [
+    {
+      "file": "P1031230.jpg",
+      "width": 3178,
+      "height": 4257,
+      "column": 0
+    },
+    {
+      "file": "P1031253.jpg",
+      "width": 5902,
+      "height": 3593,
+      "column": 1
+    },
+    {
+      "file": "P1031262.jpg",
+      "width": 2311,
+      "height": 3204,
+      "column": 0
+    },
+    {
+      "file": "P1031265.jpg",
+      "width": 3838,
+      "height": 5553,
+      "column": 2
+    },
+    {
+      "file": "P1031271.jpg",
+      "width": 6008,
+      "height": 4008,
+      "column": 1
+    },
+    {
+      "file": "P1031293.jpg",
+      "width": 3620,
+      "height": 4845,
+      "column": 1
+    },
+    {
+      "file": "P1031298.jpg",
+      "width": 1935,
+      "height": 3321,
+      "column": 2
+    }
+  ]
+}
