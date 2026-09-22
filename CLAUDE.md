@@ -33,9 +33,9 @@ Tests:
   (The old `ERR_MODULE_NOT_FOUND` on `node --test scripts/` was a Node 24.2.0 bug; it no
   longer reproduces on Node 26.8.1, but the bare form stays the supported invocation.)
 - pwsh: `pwsh -NoProfile -Command "Invoke-Pester scripts/new-gig.tests.ps1 -CI"`.
-- Current baseline: **91 node tests + 23 Pester**, all green.
+- Current baseline: **96 node tests + 23 Pester**, all green.
 
-Never commit `originals/`, `build/`, `.r2-stage/`, `node_modules/`, `.wrangler/`
+Never commit `originals/`, `build/`, `.r2-stage/`, `insta/`, `node_modules/`, `.wrangler/`
 (all gitignored). Commit only when asked; end commit messages with the Co-Authored-By
 trailer for Claude.
 
@@ -50,6 +50,7 @@ trailer for Claude.
 | Frontend | `src/assets/site.css`, `src/assets/gallery.js` |
 | Image Function | `functions/img/[[path]].js`, `wrangler.jsonc` |
 | Publish / Docker | `scripts/publish.ps1`, `scripts/dev-seed.ps1`, `Dockerfile`, `docker-compose.yml` |
+| Instagram prep | `scripts/insta-export.mjs` → `insta/<slug>/` (gitignored); skill `.claude/skills/insta` |
 
 ## Content model (current — see components 01 & 09)
 

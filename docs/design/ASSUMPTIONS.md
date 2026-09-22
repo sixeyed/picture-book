@@ -233,3 +233,19 @@ implementation starts. Items marked **§11** resolve the spec's open decisions.
 
     Test baseline moved 89 → 91 node tests (time validation; date+time sort with
     an untimed gig and a next-day gig in `scripts/lib/gigs.test.mjs`).
+
+25. **Instagram is prep-only, no API (2026-09-22):** `scripts/insta-export.mjs`
+    ranks a gig's photos by aspect fit (distance from 4:5 in log space, so 2:3
+    portraits rank first, panoramas last) and exports all of them at 1080 wide
+    into gitignored `insta/<slug>/`: tall portraits **cropped** to 4:5
+    (attention-positioned — the user chose crop over pad), anything inside
+    4:5–1.91:1 resized only, panoramas cropped to 1.91:1. A default caption
+    (artist · venue · town · date, `pictures.sixeyed.com/<slug>`, standing
+    hashtags) is written alongside. The user picks 1–3 and posts by hand.
+
+    Posting via the Instagram API was designed (public image URLs via an `insta/`
+    prefix on the image Function, token in env) but **not built**: it needs the
+    account switched to Professional and a Meta developer app. Free, but the user
+    has not decided to do it. Skill: `.claude/skills/insta`.
+
+    Test baseline moved 91 → 96 node tests (`scripts/insta-export.test.mjs`).

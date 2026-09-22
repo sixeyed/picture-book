@@ -9,7 +9,7 @@ dormant ~2 months. Read `CLAUDE.md` first (build commands + gotchas), then this.
 
 **The site is LIVE** at `https://pictures.sixeyed.com` (custom domain, TLS issued
 2026-09-09; `picture-book.pages.dev` also serves it).
-All nine components are implemented and committed; 91 node tests + 23 Pester green.
+All nine components are implemented and committed; 96 node tests + 23 Pester green.
 One real gig is published. R2 holds the 5 `web` renditions (1.23 MiB).
 
 Verified in production: pages, thumbnails, and `/img/web/...` streaming from R2

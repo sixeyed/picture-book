@@ -53,6 +53,17 @@ docker compose run --rm shell pwsh scripts/dev-seed.ps1    # load images into lo
 docker compose up web                                      # http://localhost:8788
 ```
 
+## Instagram
+
+```bash
+node scripts/insta-export.mjs <slug>     # -> insta/<slug>/ (gitignored)
+```
+
+Ranks the gig's photos by Instagram fit (4:5 first) and exports every one at feed
+size: tall portraits cropped to 4:5, panoramas to 1.91:1, anything in between
+resized only. Also writes `caption.txt` (artist · venue · date, link to the gig
+page, hashtags). Pick 1–3 and post them by hand; there is no API integration.
+
 ## Publish
 
 ```bash

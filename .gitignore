@@ -5,3 +5,4 @@ build/
 .wrangler/
 testResults.xml
 .DS_Store
+/insta/
