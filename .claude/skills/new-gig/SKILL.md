@@ -1,28 +1,48 @@
 ---
 name: new-gig
-description: Use when the user says there is a new gig (or several) to build out, names a folder under originals/, or asks to add, publish or fix a gig's JSON, cover, layout, links, time or ordering in this picture-book repo.
+description: Use when the user says there is a new gig (or several) to build out, mentions gig photos in iCloud (gig-pictures), names a folder under originals/, or asks to add, publish or fix a gig's JSON, cover, layout, links, time or ordering in this picture-book repo.
 ---
 
-# New gig: originals/<slug>/ → live on pictures.sixeyed.com
+# New gig: iCloud gig-pictures/ → live on pictures.sixeyed.com
 
 ## Overview
 
-The JPEGs are usually **already in `originals/<slug>/`** when the user asks. The
-job is: write `gigs/<slug>.json`, lay the photos out, verify in the running stack,
-publish, commit. Facts come from EXIF and verified URLs, not from guesses.
+**Input is iCloud Drive** (the standard workflow since 2026-09-27):
 
-## Step 1 — Do NOT run new-gig.ps1 on an existing folder
+```
+~/Library/Mobile Documents/com~apple~CloudDocs/gig-pictures/<yyyy-mm-dd>_<name>/darktable_exported/*.jpg
+```
 
-`new-gig.ps1` refuses when `originals/<slug>/` exists, and `-Force` **deletes the
-folder** before copying. If the originals are already there, write the JSON by hand:
+The folder name is a hint only: its date can be a typo (`2029-09-26` for a
+2026 gig), so date the gig from EXIF. Ask for what the photos can't tell you:
+venue, how it was billed, permission (default `display-only`, as at the other
+gigs so far). The job is: scaffold into `originals/<slug>/`, write
+`gigs/<slug>.json`, lay the photos out, verify in the running stack, publish,
+commit. Facts come from EXIF and verified URLs, not from guesses.
+
+Slug: `<artist>-<venue>-<yymm>`, e.g. `london-saxophonic-goods-shed-2609`.
+
+## Step 1 — Scaffold from iCloud with new-gig.ps1
 
 ```bash
 export PATH=/opt/homebrew/bin:$PATH
+SRC=~/Library/Mobile\ Documents/com~apple~CloudDocs/gig-pictures/<folder>/darktable_exported
+python3 .claude/skills/new-gig/exif-times.py "$SRC"      # real date + times first
+pwsh -NoProfile ./scripts/new-gig.ps1 -Source "$SRC" -Slug <slug> -Title '<title>' \
+  -Date <yyyy-mm-dd> -Venue '<venue>' -Location '<town>, UK' -Artists '<artist>'
+```
+
+This copies the JPEGs and writes a JSON stub with rotation-corrected dimensions.
+Then rewrite the JSON by hand (links, cover, layout, compact one-line images).
+
+**Never run `new-gig.ps1` on an existing `originals/<slug>/`**: it refuses, and
+`-Force` **deletes the folder** before copying. If the originals are already
+there, hand-write the JSON instead:
+
+```bash
 node scripts/lib/read-dimensions.mjs originals/<slug>     # rotation-corrected w×h
 python3 .claude/skills/new-gig/exif-times.py originals/<slug>   # camera-clock times
 ```
-
-Only use `new-gig.ps1` when copying from an export folder outside the repo.
 
 ## Step 2 — Date and time come from EXIF, never mdls
 

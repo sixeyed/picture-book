@@ -14,13 +14,14 @@ Everything builds, previews, and tests in Docker — no host toolchain needed.
 Assumes Cloudflare is already set up (if not, do [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 Part A once).
 
-**1. Scaffold from your darktable exports.** This copies the JPEGs into
+**1. Scaffold from your darktable exports.** Exports land in iCloud Drive under
+`gig-pictures/<yyyy-mm-dd>_<name>/darktable_exported/`. This copies the JPEGs into
 `originals/<slug>/` and writes `gigs/<slug>.json` with pixel dimensions and a starter
 3-column layout already filled in:
 
 ```bash
 pwsh ./scripts/new-gig.ps1 \
-  -Source ~/Pictures/exports/<folder> \
+  -Source ~/Library/Mobile\ Documents/com~apple~CloudDocs/gig-pictures/<folder>/darktable_exported \
   -Slug david-kayode-goods-shed-2026 \
   -Title 'David Kayode' \
   -Date 2026-07-03 \
