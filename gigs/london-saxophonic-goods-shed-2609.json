@@ -1,0 +1,39 @@
+{
+  "$schema": "../schema/gig.schema.json",
+  "slug": "london-saxophonic-goods-shed-2609",
+  "title": "London Saxophonic",
+  "date": "2026-09-26",
+  "venue": {
+    "name": "Goods Shed",
+    "location": "Stroud, UK",
+    "links": [
+      { "label": "Website", "url": "https://www.sva.org.uk/goods-shed-sessions" },
+      { "label": "Facebook", "url": "https://www.facebook.com/thegoodsshedstroud/" }
+    ]
+  },
+  "artists": [
+    {
+      "name": "London Saxophonic",
+      "links": [
+        { "label": "Wikipedia", "url": "https://en.wikipedia.org/wiki/London_Saxophonic" },
+        { "label": "Sax Pax for a Sax", "url": "https://moondog.bandcamp.com/album/sax-pax-for-a-sax" }
+      ]
+    }
+  ],
+  "permission": "display-only",
+  "description": "Sax Pax for a Sax: the music of Moondog.",
+  "cover": "P1031356.jpg",
+  "layout": { "columns": 3, "widths": [1, 1.14, 1.03] },
+  "images": [
+    { "file": "P1031310.jpg", "width": 6007, "height": 2727, "column": 0 },
+    { "file": "P1031312.jpg", "width": 1991, "height": 3512, "column": 0 },
+    { "file": "P1031316.jpg", "width": 6007, "height": 3599, "column": 1 },
+    { "file": "P1031322.jpg", "width": 5814, "height": 2828, "column": 0 },
+    { "file": "P1031324.jpg", "width": 6008, "height": 4008, "column": 2 },
+    { "file": "P1031343.jpg", "width": 6007, "height": 3369, "column": 1 },
+    { "file": "P1031347.jpg", "width": 3087, "height": 3748, "column": 2 },
+    { "file": "P1031356.jpg", "width": 5212, "height": 3256, "column": 1 },
+    { "file": "P1031379.jpg", "width": 5187, "height": 3854, "column": 2 },
+    { "file": "P1031384.jpg", "width": 6007, "height": 3511, "column": 1 }
+  ]
+}
