@@ -97,8 +97,7 @@ pwsh -NoProfile ./scripts/publish.ps1 -SkipBuild
 ```
 Check live: gig page 200, each `/img/web/<slug>/<file>` 200, `/img/full/...` 404
 for display-only. Commit `content: add <title> at <venue>`; push `origin`, then
-`git push github main` (if it hangs on osxkeychain:
-`git -c credential.helper= -c credential.helper='!gh auth git-credential' push github main`).
+`git push github main` (the `github` remote is SSH, `git@github.com:sixeyed/picture-book.git`).
 
 ## Report to the user
 

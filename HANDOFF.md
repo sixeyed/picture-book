@@ -183,7 +183,7 @@ These are in `CLAUDE.md` but are worth repeating because each one cost real time
   | Remote | Role |
   |---|---|
   | `origin` | private self-hosted forge; the default push target (URL deliberately not recorded — see `git remote -v`) |
-  | `github` | https://github.com/sixeyed/picture-book — the **public** copy of the code |
+  | `github` | https://github.com/sixeyed/picture-book — the **public** copy of the code; pushed over SSH (`git@github.com:sixeyed/picture-book.git`) |
 
   A bare `git push` reaches only the forge. The public GitHub copy needs an explicit
   `git push github main` or it silently falls behind. Neither remote gates the live
